@@ -24,10 +24,10 @@ setup(
         "CI": "https://github.com/mapmanager/brightest-path-lib/actions",
         "Changelog": "https://github.com/mapmanager/brightest-path-lib/releases",
     },
-    license="Apache License, Version 2.0",
+    license="GNU General Public License, Version 3",
     version=VERSION,
     packages=["brightest_path_lib"],
-    install_requires=[],
+    install_requires=["numpy"],
     extras_require={"test": ["pytest"]},
     python_requires=">=3.7",
 )
