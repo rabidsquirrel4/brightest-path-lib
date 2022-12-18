@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/brightest-path-lib.svg)](https://pypi.org/project/brightest-path-lib/)
 [![Changelog](https://img.shields.io/github/v/release/mapmanager/brightest-path-lib?include_prereleases&label=changelog)](https://github.com/mapmanager/brightest-path-lib/releases)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/mapmanager/brightest-path-lib/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-GPLv3-blue)](https://github.com/mapmanager/brightest-path-lib/blob/main/LICENSE)
 
 A library of path-finding algorithms to find the brightest path between two points.
 
