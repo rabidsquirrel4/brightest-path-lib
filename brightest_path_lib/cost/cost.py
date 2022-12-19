@@ -6,7 +6,7 @@ class Cost(ABC):
 
     @abstractmethod
     def cost_of_moving_to(self, intensity_at_new_point: float) -> float:
-        """Returns the cost of moving to a point
+        """calculates the cost of moving to a point
 
         Parameters
         ----------
@@ -22,7 +22,7 @@ class Cost(ABC):
 
     @abstractmethod
     def minimum_step_cost(self) -> float:
-        """Returns the minimum step cost
+        """calculates the minimum step cost
         (depends on the cost function implementation)
         
         Returns

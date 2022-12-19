@@ -1,7 +1,4 @@
-from cost import Cost
-
-RECIPROCAL_MIN = 1E-6
-RECIPROCAL_MAX = 255.0
+from brightest_path_lib.cost import Cost
 
 class Reciprocal(Cost):
     """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving
@@ -31,10 +28,11 @@ class Reciprocal(Cost):
         self.max_intensity = max_intensity
         self.RECIPROCAL_MIN = 1E-6
         self.RECIPROCAL_MAX = 255.0
+        self._min_step_cost = 1 / self.RECIPROCAL_MAX
         
 
     def cost_of_moving_to(self, intensity_at_new_point: float) -> float:
-        """Returns the cost of moving to a point
+        """calculates the cost of moving to a point
 
         Parameters
         ----------
@@ -54,20 +52,20 @@ class Reciprocal(Cost):
         """
         intensity_at_new_point = 255.0 * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
 
-        if intensity_at_new_point < RECIPROCAL_MIN:
-            intensity_at_new_point = RECIPROCAL_MIN
-        elif intensity_at_new_point > RECIPROCAL_MAX:
-            intensity_at_new_point = RECIPROCAL_MAX
+        if intensity_at_new_point < self.RECIPROCAL_MIN:
+            intensity_at_new_point = self.RECIPROCAL_MIN
+        elif intensity_at_new_point > self.RECIPROCAL_MAX:
+            intensity_at_new_point = self.RECIPROCAL_MAX
         
         return 1.0 / intensity_at_new_point
     
     def minimum_step_cost(self) -> float:
-        """Returns the minimum step cost
+        """calculates the minimum step cost
         
         Returns
         -------
         float
             the minimum step cost
         """
-        return 1.0 / RECIPROCAL_MAX
+        return self._min_step_cost
 

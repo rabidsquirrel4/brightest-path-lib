@@ -7,7 +7,7 @@ class Heuristic(ABC):
 
     @abstractmethod
     def estimate_cost_to_goal(self, current_point: np.ndarray, goal_point: np.ndarray) -> float:
-        """Returns the estimated cost from current point to the goal
+        """calculates the estimated cost from current point to the goal
         (implementation depends on the heuristic function)
 
         Parameters

@@ -1,9 +1,9 @@
-from heuristic import Heuristic
+from brightest_path_lib.heuristic import Heuristic
 import math
 import numpy as np
 
 class Euclidean(Heuristic):
-    """A* search heuristic using Euclidean distance from current point to goal point
+    """heuristic cost estimation using Euclidean distance from current point to goal point
 
     Parameters
     ----------
@@ -29,7 +29,7 @@ class Euclidean(Heuristic):
             self.scale_z = scale[2]
 
     def estimate_cost_to_goal(self, current_point: np.ndarray, goal_point: np.ndarray) -> float:
-        """Returns the estimated cost from current point to the goal
+        """calculates the estimated cost from current point to the goal
     
         Parameters
         ----------

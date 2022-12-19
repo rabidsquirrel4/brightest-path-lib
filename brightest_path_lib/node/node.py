@@ -1,6 +1,35 @@
 import numpy as np
 
 class Node:
+    """Class holding information about a node
+
+    Parameters
+    ----------
+    point : numpy ndarray
+        the 2D/3D coordinates of the node (can be a pixel or a voxel)
+    g_score : float
+        the distance from a starting node to the current node
+    h_score : float
+        the estimated distance from the current node to a goal_node
+    predecessor : Node
+        the current node's immediate predecessor, from which we
+        travelled to the current node
+    
+    Attributes
+    ----------
+    point : numpy ndarray
+        the 2D/3D coordinates of the node
+    g_score : float
+        the actual cost from a starting node to the current node
+    h_score : float
+        the estimated cost from the current node to a goal_node
+    f_score : float
+        the sum of the node's g_score and h_score
+    predecessor : Node
+        the current node's immediate predecessor, from which we
+        travelled to the current node
+    
+    """
     def __init__(
         self,
         point: np.ndarray,

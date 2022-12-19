@@ -1,6 +1,32 @@
 import numpy as np
 
 class ImageStats:
+    """Class holding metadata about an image
+
+    Parameters
+    ----------
+    image : numpy ndarray
+        the image who's metadata is being stored
+
+    Attributes
+    ----------
+    min_intensity : float
+        the minimum intensity of a pixel/voxel in the given image
+    max_intensity : float
+        the maximum intensity of a pixel/voxel in the given image
+    x_min : int
+        the smallest x-coordinate of the given image
+    y_min : int
+        the smallest y-coordinate of the given image
+    z_min : int
+        the smallest z-coordinate of the given image
+    x_max : int
+        the largest x-coordinate of the given image
+    y_max : int
+        the largest y-coordinate of the given image
+    z_max : int
+        the largest z-coordinate of the given image
+    """
 
     def __init__(self, image: np.ndarray):
         self.min_intensity = np.min(image)
@@ -12,6 +38,7 @@ class ImageStats:
         self.y_max = len(image) - 1
         self.z_max = 0
         if len(image.shape) == 3:
+            # will be in the form (z, x, y) 
             self.z_max = image.shape[0] - 1
             self.x_max = image.shape[1] - 1
             self.y_max = image.shape[2] - 1
