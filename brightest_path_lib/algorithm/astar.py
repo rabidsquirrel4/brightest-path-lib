@@ -3,12 +3,11 @@ import math
 import numpy as np
 from queue import PriorityQueue
 from typing import List
-
-from cost import Reciprocal
-from heuristic import Euclidean
-from image import ImageStats
-from input import CostFunction, HeuristicFunction
-from node import Node
+from brightest_path_lib.cost import Reciprocal
+from brightest_path_lib.heuristic import Euclidean
+from brightest_path_lib.image import ImageStats
+from brightest_path_lib.input import CostFunction, HeuristicFunction
+from brightest_path_lib.node import Node
 
 
 class AStarSearch:

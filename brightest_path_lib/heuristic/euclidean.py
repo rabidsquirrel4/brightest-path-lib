@@ -1,4 +1,4 @@
-from heuristic import Heuristic
+from brightest_path_lib.heuristic import Heuristic
 import math
 import numpy as np
 

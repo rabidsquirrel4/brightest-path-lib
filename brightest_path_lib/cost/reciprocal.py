@@ -1,4 +1,4 @@
-from cost import Cost
+from brightest_path_lib.cost import Cost
 
 class Reciprocal(Cost):
     """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving
