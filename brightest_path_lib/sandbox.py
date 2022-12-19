@@ -38,6 +38,4 @@ def test_3D_image():
     napari.run()
 
 if __name__ == "__main__":
-    test_3D_image()
-
-
+    test_2D_image()
