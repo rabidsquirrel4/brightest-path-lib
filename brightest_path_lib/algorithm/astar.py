@@ -17,22 +17,45 @@ class AStarSearch:
     Parameters
     ----------
     image : numpy ndarray
+        the 2D/3D image on which we will run an A star search
+    start_point : numpy ndarray
+        the 2D/3D coordinates of the starting point (could be a pixel or a voxel)
+    goal_point : numpy ndarray
+        the 2D/3D coordinates of the goal point (could be a pixel or a voxel)
+    scale : float
+        the scale of the image; defaults to 1.0 if image is not zoomed in/out
+    cost_function : Enum CostFunction
+        this enum value specifies the cost function to be used for computing 
+        the cost of moving to a new point
+        Default type is CostFunction.RECIPROCAL to use the reciprocal function
+    heuristic_function : Enum HeuristicFunction
+        this enum value specifies the heuristic function to be used to compute
+        the estimated cost of moving from a point to the goal
+        Default type is HeuristicFunction.EUCLIDEAN to use the 
+        euclidean function for cost estimation
+
+    Attributes
+    ----------
+    image : numpy ndarray
         the image where A star search is suppossed to run on
     start_point : numpy ndarray
         the coordinates of the start point
     goal_point : numpy ndarray
         the coordinates of the goal point
     scale : float
-        the scale of the image.
-        defaults to 1.0 if image is not zoomed in/out
-    cost_function : numpy ndarray
+        the scale of the image; defaults to 1.0 if image is not zoomed in/out
+    cost_function : Cost
         the cost function to be used for computing the cost of moving 
-        to a new point. For more details, see the cost folder
-    heuristic_function : numpy ndarray
+        to a new point
+        Default type is Reciprocal
+    heuristic_function : Heuristic
         the heuristic function to be used to compute the estimated
-        cost of moving from a point to the goal. For more details,
-        see the heuristic folder.
-    
+        cost of moving from a point to the goal
+        Default type is Euclidean
+    result : List[numpy ndarray]
+        the result of the A star search containing the list of actual
+        points that constitute the brightest path from start_point to
+        goal_point    
     """
 
     def __init__(
@@ -60,7 +83,16 @@ class AStarSearch:
         
         self.result = []  
 
-    def search(self):
+    def search(self) -> List[np.ndarray]:
+        """Function that performs A star search
+
+        Returns
+        -------
+        List[np.ndarray]
+            the list containing the 2D/3D point coordinates
+            that constitute the brightest path between the
+            start_point and the goal_point
+        """
         count = 0
         open_set = PriorityQueue()
         start_node = Node(
@@ -69,10 +101,10 @@ class AStarSearch:
             h_score=self._estimate_cost_to_goal(self.start_point), 
             predecessor=None
             )
-        open_set.put((0, count, start_node))
-        open_set_hash = {tuple(self.start_point)}
-        close_set_hash = set()
-        f_scores = defaultdict(self._default_value)
+        open_set.put((0, count, start_node)) # f_score, count: priority of occurence, current node
+        open_set_hash = {tuple(self.start_point)} # hashset contains tuple of node coordinates to be visited
+        close_set_hash = set() # hashset contains tuple of node coordinates already been visited
+        f_scores = defaultdict(self._default_value) # key: tuple of node coordinates, value: f_score
         f_scores[tuple(self.start_point)] = start_node.f_score
         
         while not open_set.empty():
@@ -109,15 +141,56 @@ class AStarSearch:
         return self.result
     
     def _default_value(self) -> float:
+        """the default value f_score of all nodes in the image
+
+        Returns
+        -------
+        float
+            returns infinity as the default f_score
+        """
         return float("inf")
     
     def _find_neighbors_of(self, node: Node) -> List[Node]:
+        """Finds the neighbors of a node (2D/3D)
+
+        Parameters
+        ----------
+        node : Node
+            the node whose neighbors we are interested in
+        
+        Returns
+        -------
+        List[Node]
+            a list of nodes that are the neighbors of the given node
+        """
         if len(node.point) == 2:
             return self._find_2D_neighbors_of(node)
         else:
             return self._find_3D_neighbors_of(node)
     
     def _find_2D_neighbors_of(self, node: Node) -> List[Node]:
+        """Finds the neighbors of a 2D node
+
+        Parameters
+        ----------
+        node : Node
+            the node whose neighbors we are interested in
+
+        Returns
+        -------
+        List[Node]
+            a list of nodes that are the neighbors of the given node
+        
+        Notes
+        -----
+        - At max a given 2D node can have 8 neighbors-
+        vertical neighbors: top, bottom,
+        horizontal neighbors: left, right
+        diagonal neighbors: top-left, top-right, bottom-left, bottom-right
+        - Of course, we need to check for invalid cases where we can't move
+        in these directions
+        - 2D coordinates are of the type (x, y)
+        """
         neighbors = []
         steps = [-1, 0, 1]
         for xdiff in steps:
@@ -155,7 +228,28 @@ class AStarSearch:
         return neighbors
 
     def _find_3D_neighbors_of(self, node: Node) -> List[Node]:
-        """3D coordinates are of the form (z, x, y)
+        """Finds the neighbors of a 3D node
+
+        Parameters
+        ----------
+        node : Node
+            the node whose neighbors we are interested in
+
+        Returns
+        -------
+        List[Node]
+            a list of nodes that are the neighbors of the given node
+        
+        Notes
+        -----
+        - At max a given 3D node can have 26 neighbors-
+        Imagine a 3X3X3 3D cube. It will contain 27 nodes.
+        If we consider the center node as the current node, it will have 26 neighbors
+        (excluding itself.)
+        - Of course, we need to check for invalid cases where we can't have
+        26 neighbors (when the current node is closer to,
+        or on the edges of the image)
+        - 3D coordinates are of the form (z, x, y)
         """
         neighbors = []
         steps = [-1, 0, 1]
@@ -205,14 +299,49 @@ class AStarSearch:
         return neighbors
     
     def _found_goal(self, point: np.ndarray) -> bool:
+        """Checks if the goal point is reached
+
+        Parameters
+        ----------
+        point : numpy ndarray
+            the point whose coordinates are to be compared to the goal
+            point for equality
+
+        Returns
+        -------
+        bool
+            returns True if the goal is reached; False otherwise
+        """
         return np.array_equal(point, self.goal_point)
 
     def _estimate_cost_to_goal(self, point: np.ndarray) -> float:
+        """Estimates the heuristic cost (h_score) between a point
+        and the goal
+
+        Parameters
+        ----------
+        point : numpy ndarray
+            the point from which we have to estimate the heuristic cost to
+            goal
+
+        Returns
+        -------
+        float
+            returns the heuristic cost between the point and goal point
+        """
         return self.cost_function.minimum_step_cost() * self.heuristic_function.estimate_cost_to_goal(
             current_point=point, goal_point=self.goal_point
         )
 
     def _construct_path_from(self, node: Node):
+        """stores the coodinates of nodes that constitute the brightest path 
+        from the goal_point to the start_point once the goal is reached.
+
+        Parameters
+        ----------
+        node : Node
+            a node that lies on the brightest path
+        """
         while node is not None:
             self.result.insert(0, node.point)
             node = node.predecessor

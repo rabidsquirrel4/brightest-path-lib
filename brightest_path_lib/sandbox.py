@@ -8,8 +8,8 @@ def test_2D_image():
     # testing for 2D
     #twoDImage = data.cells3d()[30, 1]  # brighter image
     twoDImage = data.cells3d()[30, 0] # darker image
-    start_point = np.array([60,129])
-    goal_point = np.array([131,0])
+    start_point = np.array([0,192])
+    goal_point = np.array([198,9])
 
     astar_search = AStarSearch(
         image=twoDImage,
