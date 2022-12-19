@@ -1,2 +1,2 @@
-from brightest_path_lib.heuristic.heuristic import Heuristic
-from brightest_path_lib.heuristic.euclidean import Euclidean
+from .heuristic import Heuristic
+from .euclidean import Euclidean

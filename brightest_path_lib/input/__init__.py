@@ -1,1 +1,1 @@
-from brightest_path_lib.input.inputs import CostFunction, HeuristicFunction, SearchFunction
+from .inputs import CostFunction, HeuristicFunction, SearchFunction

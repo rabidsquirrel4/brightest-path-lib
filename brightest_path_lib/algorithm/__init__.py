@@ -1,1 +1,1 @@
-from brightest_path_lib.algorithm.astar import AStarSearch
+from .astar import AStarSearch

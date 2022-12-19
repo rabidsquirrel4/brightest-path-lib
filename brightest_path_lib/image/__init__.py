@@ -1,1 +1,1 @@
-from brightest_path_lib.image.stats import ImageStats
+from .stats import ImageStats
