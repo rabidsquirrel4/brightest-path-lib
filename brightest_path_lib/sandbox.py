@@ -1,22 +1,29 @@
 from algorithm import AStarSearch
+import time
 from skimage import data
 import numpy as np
 import napari
 
 def test_2D_image():
     # testing for 2D
-    twoDImage = data.cells3d()[30, 1]  # grab some data
+    #twoDImage = data.cells3d()[30, 1]  # brighter image
+    twoDImage = data.cells3d()[30, 0] # darker image
+    start_point = np.array([60,129])
+    goal_point = np.array([131,0])
+
     astar_search = AStarSearch(
         image=twoDImage,
-        start_point=np.array([72,67]),
-        goal_point=np.array([104,42]),
-        )
-
+        start_point=start_point,
+        goal_point=goal_point)
+    tic = time.perf_counter()
     result = astar_search.search()
-    print(result)
+    toc = time.perf_counter()
+    print(f"Found brightest path in {toc - tic:0.4f} seconds")
+    print(f"path size: {len(result)}")
 
     viewer = napari.Viewer()
     viewer.add_image(twoDImage[:200, :200], colormap='magma')
+    viewer.add_points(np.array([start_point, goal_point]), size=2, edge_width=1, face_color="white", edge_color="white")
     viewer.add_points(result, size=1, edge_width=1, face_color="green", edge_color="green")
     napari.run()
 
