@@ -4,7 +4,8 @@ RECIPROCAL_MIN = 1E-6
 RECIPROCAL_MAX = 255.0
 
 class Reciprocal(Cost):
-    """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving to a neighboring point
+    """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving
+    to a neighboring point
 
     Parameters
     ----------
@@ -13,12 +14,23 @@ class Reciprocal(Cost):
     max_intensity : float
         The maximum intensity a pixel/voxel can have in a given image
 
+    Attributes
+    ----------
+    RECIPROCAL_MIN : float
+        To cope with zero intensities, RECIPROCAL_MIN is added to the intensities
+        in the range before reciprocal calculation
+    RECIPROCAL_MAX : float
+        We set the maximum intensity <= RECIPROCAL_MAX so that the intensity
+        is between RECIPROCAL MIN and RECIPROCAL_MAX
+
     """
 
     def __init__(self, min_intensity: float, max_intensity: float) -> None:
         super().__init__()
         self.min_intensity = min_intensity
         self.max_intensity = max_intensity
+        self.RECIPROCAL_MIN = 1E-6
+        self.RECIPROCAL_MAX = 255.0
         
 
     def cost_of_moving_to(self, intensity_at_new_point: float) -> float:
@@ -42,7 +54,7 @@ class Reciprocal(Cost):
         """
         intensity_at_new_point = 255.0 * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
 
-        if intensity_at_new_point <= 0:
+        if intensity_at_new_point < RECIPROCAL_MIN:
             intensity_at_new_point = RECIPROCAL_MIN
         elif intensity_at_new_point > RECIPROCAL_MAX:
             intensity_at_new_point = RECIPROCAL_MAX

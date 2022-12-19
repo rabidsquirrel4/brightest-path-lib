@@ -1,2 +1,2 @@
-from cost import Cost
-from reciprocal import Reciprocal
+from .cost import Cost
+from .reciprocal import Reciprocal
