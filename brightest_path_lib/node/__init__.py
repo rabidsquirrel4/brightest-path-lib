@@ -1,1 +1,1 @@
-from .node import Node
+from brightest_path_lib.node.node import Node
