@@ -33,7 +33,7 @@ setup(
         "brightest_path_lib.*",
         "brightest_path_lib.algorithm",
         "brightest_path_lib.input"
-        ])
+        ]),
     install_requires=["numpy"],
     extras_require={"test": ["pytest", "scikit-image"]},
     python_requires=">=3.7",
