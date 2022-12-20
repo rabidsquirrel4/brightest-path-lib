@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 
 VERSION = "0.1"
@@ -26,7 +26,8 @@ setup(
     },
     license="GNU General Public License, Version 3",
     version=VERSION,
-    packages=["brightest_path_lib"],
+    #packages=["brightest_path_lib"],
+    packages=find_packages(),
     install_requires=["numpy"],
     extras_require={"test": ["pytest"]},
     python_requires=">=3.7",

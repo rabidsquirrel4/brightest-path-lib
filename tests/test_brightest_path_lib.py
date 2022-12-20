@@ -1,5 +1,18 @@
-from brightest_path_lib import example_function
+from brightest_path_lib import input, algorithm
+from skimage import data
+import numpy as np
 
+cost_function = input.CostFunction.RECIPROCAL
+heuristic_function = input.HeuristicFunction.EUCLIDEAN
 
-def test_example_function():
-    assert example_function() == 2
+twoDImage = data.cells3d()[30, 0] # darker image
+start_point = np.array([0,192])
+goal_point = np.array([198,9])
+
+res = algorithm.AStarSearch(
+    image=twoDImage,
+    start_point=start_point,
+    goal_point=goal_point,
+    cost_function=cost_function,
+    heuristic_function=heuristic_function
+    )
