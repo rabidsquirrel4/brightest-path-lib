@@ -27,8 +27,14 @@ setup(
     license="GNU General Public License, Version 3",
     version=VERSION,
     #packages=["brightest_path_lib"],
-    packages=find_packages(),
+    #packages=find_packages(),
+    packages=find_packages(include=[
+        "brightest_path_lib",
+        "brightest_path_lib.*",
+        "brightest_path_lib.algorithm",
+        "brightest_path_lib.input"
+        ])
     install_requires=["numpy"],
-    extras_require={"test": ["pytest"]},
+    extras_require={"test": ["pytest", "scikit-image"]},
     python_requires=">=3.7",
 )
