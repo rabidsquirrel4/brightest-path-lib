@@ -29,26 +29,37 @@ class ImageStats:
     """
 
     def __init__(self, image: np.ndarray):
+        # checks
+        if image is None:
+            raise TypeError
+        if len(image) == 0:
+            raise ValueError
+
         self.min_intensity = np.min(image)
         self.max_intensity = np.max(image)
         self.x_min = 0
         self.y_min = 0
         self.z_min = 0
-        self.x_max = len(image[0]) - 1
-        self.y_max = len(image) - 1
-        self.z_max = 0
         if len(image.shape) == 3:
             # will be in the form (z, x, y) 
             self.z_max = image.shape[0] - 1
+            self.y_max = image.shape[1] - 1
+            self.x_max = image.shape[2] - 1
+        elif len(image.shape) == 2:
+            self.z_max = 0
+            self.y_max = image.shape[0] - 1
             self.x_max = image.shape[1] - 1
-            self.y_max = image.shape[2] - 1
-    
+            # self.x_max = len(image[0]) - 1
+            # self.y_max = len(image) - 1
+
     @property
     def min_intensity(self) -> float:
         return self._min_intensity
 
     @min_intensity.setter
     def min_intensity(self, value: float):
+        if value is None:
+            raise TypeError
         self._min_intensity = value 
     
     @property
@@ -57,6 +68,8 @@ class ImageStats:
     
     @max_intensity.setter
     def max_intensity(self, value: float):
+        if value is None:
+            raise TypeError
         self._max_intensity = value
     
     @property
@@ -65,6 +78,8 @@ class ImageStats:
     
     @x_min.setter
     def x_min(self, value: float):
+        if value is None:
+            raise TypeError
         self._x_min = value
     
     @property
@@ -73,6 +88,8 @@ class ImageStats:
     
     @y_min.setter
     def y_min(self, value: float):
+        if value is None:
+            raise TypeError
         self._y_min = value
     
     @property
@@ -81,6 +98,8 @@ class ImageStats:
     
     @z_min.setter
     def z_min(self, value: float):
+        if value is None:
+            raise TypeError
         self._z_min = value
     
     @property
@@ -89,6 +108,8 @@ class ImageStats:
     
     @x_max.setter
     def x_max(self, value: float):
+        if value is None:
+            raise TypeError
         self._x_max = value
     
     @property
@@ -97,6 +118,8 @@ class ImageStats:
     
     @y_max.setter
     def y_max(self, value: float):
+        if value is None:
+            raise TypeError
         self._y_max = value
     
     @property
@@ -105,4 +128,6 @@ class ImageStats:
     
     @z_max.setter
     def z_max(self, value: float):
+        if value is None:
+            raise TypeError
         self._z_max = value

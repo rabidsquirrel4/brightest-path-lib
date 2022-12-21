@@ -49,6 +49,10 @@ class Node:
     
     @point.setter
     def point(self, value: np.ndarray):
+        if value is None:
+            raise TypeError
+        if len(value) == 0:
+            raise ValueError
         self._point = value
 
     @property
@@ -57,6 +61,8 @@ class Node:
     
     @g_score.setter
     def g_score(self, value: float):
+        if value is None:
+            raise TypeError
         self._g_score = value
     
     @property
@@ -65,6 +71,8 @@ class Node:
     
     @h_score.setter
     def h_score(self, value: float):
+        if value is None:
+            raise TypeError
         self._h_score = value
     
     @property
@@ -73,6 +81,8 @@ class Node:
     
     @f_score.setter
     def f_score(self, value: float):
+        if value is None:
+            raise TypeError
         self._f_score = value
     
     @property

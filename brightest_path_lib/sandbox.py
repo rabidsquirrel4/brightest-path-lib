@@ -22,7 +22,7 @@ def test_2D_image():
     print(f"path size: {len(result)}")
 
     viewer = napari.Viewer()
-    viewer.add_image(twoDImage[:200, :200], colormap='magma')
+    viewer.add_image(twoDImage[:100, :250], colormap='magma')
     viewer.add_points(np.array([start_point, goal_point]), size=2, edge_width=1, face_color="white", edge_color="white")
     viewer.add_points(result, size=1, edge_width=1, face_color="green", edge_color="green")
     napari.run()
@@ -32,7 +32,7 @@ def test_3D_image():
     threeDImage = data.cells3d()[30]  # grab some data
     astar_search = AStarSearch(
         image=threeDImage,
-        start_point=np.array([1, 16, 1]),
+        start_point=np.array([1, 16, 1]), # z, x, y in 3D
         goal_point=np.array([1, 35, 1]),
         )
 
