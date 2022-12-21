@@ -28,5 +28,3 @@ jobs:
         pytest --cov=./tests --cov-report=xml --ignore=./brightest_path_lib/sandbox.py
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
