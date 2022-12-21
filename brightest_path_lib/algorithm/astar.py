@@ -80,7 +80,7 @@ class AStarSearch:
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
             self.heuristic_function = Euclidean(scale=self.scale)
         
-        self.result = []  
+        self.result = []
 
     def search(self) -> List[np.ndarray]:
         """Function that performs A star search
