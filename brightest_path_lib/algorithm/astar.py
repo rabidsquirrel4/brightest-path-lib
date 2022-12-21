@@ -66,6 +66,9 @@ class AStarSearch:
         cost_function: CostFunction = CostFunction.RECIPROCAL,
         heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN
     ):
+
+        self._validate_inputs(image, start_point, goal_point)
+
         self.image = image
         self.image_stats = ImageStats(image)
         self.start_point = start_point
@@ -81,6 +84,18 @@ class AStarSearch:
             self.heuristic_function = Euclidean(scale=self.scale)
         
         self.result = []
+
+    def _validate_inputs(
+        self,
+        image: np.ndarray,
+        start_point: np.ndarray,
+        goal_point: np.ndarray,
+    ):
+
+        if image is None or start_point is None or goal_point is None:
+            raise TypeError
+        if len(image) == 0 or len(start_point) == 0 or len(goal_point) == 0:
+            raise ValueError
 
     def search(self) -> List[np.ndarray]:
         """Function that performs A star search
