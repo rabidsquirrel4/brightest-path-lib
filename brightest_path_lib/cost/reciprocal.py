@@ -24,6 +24,10 @@ class Reciprocal(Cost):
 
     def __init__(self, min_intensity: float, max_intensity: float) -> None:
         super().__init__()
+        if min_intensity is None or max_intensity is None:
+            raise TypeError
+        if min_intensity > max_intensity:
+            raise ValueError
         self.min_intensity = min_intensity
         self.max_intensity = max_intensity
         self.RECIPROCAL_MIN = 1E-6
@@ -50,12 +54,13 @@ class Reciprocal(Cost):
         - We set the maximum intensity <= RECIPROCAL_MAX so that the intensity is between RECIPROCAL MIN and RECIPROCAL_MAX
         
         """
-        intensity_at_new_point = 255.0 * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
+        if intensity_at_new_point > self.max_intensity:
+            raise ValueError
+
+        intensity_at_new_point = self.RECIPROCAL_MAX * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
 
         if intensity_at_new_point < self.RECIPROCAL_MIN:
             intensity_at_new_point = self.RECIPROCAL_MIN
-        elif intensity_at_new_point > self.RECIPROCAL_MAX:
-            intensity_at_new_point = self.RECIPROCAL_MAX
         
         return 1.0 / intensity_at_new_point
     
@@ -68,4 +73,3 @@ class Reciprocal(Cost):
             the minimum step cost
         """
         return self._min_step_cost
-
