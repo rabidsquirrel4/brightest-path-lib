@@ -31,7 +31,11 @@ three_dim_result = np.array([np.array([0, 0, 0]), np.array([1, 1, 0]), np.array(
 
 @pytest.mark.parametrize("image, start_point, goal_point, scale", [
     (two_dim_image, two_dim_start_point, two_dim_goal_point, two_dim_scale),
+    (two_dim_image.astype(np.uint32), two_dim_start_point, two_dim_goal_point, two_dim_scale),
+    ((two_dim_image/np.max(two_dim_image) * 255).astype(np.uint8), two_dim_start_point, two_dim_goal_point, two_dim_scale),
     (three_dim_image, three_dim_start_point, three_dim_goal_point, three_dim_scale),
+    (three_dim_image.astype(np.uint32), three_dim_start_point, three_dim_goal_point, three_dim_scale),
+    ((three_dim_image/np.max(three_dim_image) * 255).astype(np.uint8), three_dim_start_point, three_dim_goal_point, three_dim_scale),
 ])
 def test_init_with_valid_input(image, start_point, goal_point, scale):
     astar = AStarSearch(image, start_point, goal_point, scale)
@@ -64,7 +68,11 @@ def test_init_with_empty_input(image, start_point, goal_point, scale):
 
 @pytest.mark.parametrize("image, start_point, goal_point, scale, expected_result", [
     (two_dim_image, two_dim_start_point, two_dim_goal_point, two_dim_scale, two_dim_result),
+    (two_dim_image.astype(np.uint32), two_dim_start_point, two_dim_goal_point, two_dim_scale, two_dim_result),
+    ((two_dim_image/np.max(two_dim_image) * 255).astype(np.uint8), two_dim_start_point, two_dim_goal_point, two_dim_scale, two_dim_result),
     (three_dim_image, three_dim_start_point, three_dim_goal_point, three_dim_scale, three_dim_result),
+    (three_dim_image.astype(np.uint32), three_dim_start_point, three_dim_goal_point, three_dim_scale, three_dim_result),
+    ((three_dim_image/np.max(three_dim_image) * 255).astype(np.uint8), three_dim_start_point, three_dim_goal_point, three_dim_scale, three_dim_result),
 ])
 def test_search(image, start_point, goal_point, scale, expected_result):
     astar = AStarSearch(image, start_point, goal_point, scale)
