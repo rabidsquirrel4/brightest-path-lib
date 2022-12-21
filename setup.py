@@ -23,6 +23,6 @@ setup(
         "brightest_path_lib.input"
         ]),
     install_requires=["numpy"],
-    extras_require={"test": ["pytest", "scikit-image", "pooch"]},
+    extras_require={"test": ["pytest", "pytest-cov", "scikit-image", "pooch"]},
     python_requires=">=3.7",
 )
