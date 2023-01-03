@@ -30,6 +30,6 @@ jobs:
         pip install '.[test]'
     - name: Test and generate coverage report
       run: |
-        pytest --cov=./tests --cov-report=xml --ignore=./brightest_path_lib/sandbox.py
+        pytest --cov=./tests --cov-report=xml --ignore=./brightest_path_lib/sandbox.py,./brightest_path_lib/sandbox2.py
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

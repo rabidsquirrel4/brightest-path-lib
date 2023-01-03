@@ -10,7 +10,7 @@ two_dim_image = np.array([[ 4496,  5212,  6863, 10113,  7055],
        [ 5745,  7845, 11113,  7820,  3551]])
 two_dim_start_point = np.array([0,0])
 two_dim_goal_point = np.array([4,4])
-two_dim_scale = np.array([1.0, 1.0])
+two_dim_scale = (1.0, 1.0)
 two_dim_result = np.array([np.array([0, 0]), np.array([0, 1]), np.array([1, 2]), np.array([2, 3]), np.array([3, 3]), np.array([4, 3]), np.array([4, 4])])
 
 three_dim_image = np.array([[[ 4496,  5212,  6863, 10113,  7055],
@@ -26,7 +26,7 @@ three_dim_image = np.array([[[ 4496,  5212,  6863, 10113,  7055],
         [ 6117,  6022,  7160,  7113,  7066]]])
 three_dim_start_point = np.array([0,0,0])
 three_dim_goal_point = np.array([0,4,4])
-three_dim_scale = np.array([1.0, 1.0, 1.0])
+three_dim_scale = (1.0, 1.0, 1.0)
 three_dim_result = np.array([np.array([0, 0, 0]), np.array([1, 1, 0]), np.array([1, 2, 1]), np.array([0, 3, 2]), np.array([0, 4, 3]), np.array([0, 4, 4])])
 
 @pytest.mark.parametrize("image, start_point, goal_point, scale", [
