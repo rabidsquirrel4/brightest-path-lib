@@ -1,7 +1,7 @@
 from collections import defaultdict
 import math
 import numpy as np
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 from typing import List
 from brightest_path_lib.cost import Reciprocal
 from brightest_path_lib.heuristic import Euclidean
@@ -64,7 +64,8 @@ class AStarSearch:
         goal_point: np.ndarray,
         scale: np.ndarray = np.array([1.0, 1.0]),
         cost_function: CostFunction = CostFunction.RECIPROCAL,
-        heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN
+        heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN,
+        open_nodes: Queue = None
     ):
 
         self._validate_inputs(image, start_point, goal_point)
@@ -74,6 +75,7 @@ class AStarSearch:
         self.start_point = start_point
         self.goal_point = goal_point
         self.scale = scale
+        self.open_nodes = open_nodes
 
         if cost_function == CostFunction.RECIPROCAL:
             self.cost_function = Reciprocal(
@@ -83,6 +85,7 @@ class AStarSearch:
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
             self.heuristic_function = Euclidean(scale=self.scale)
         
+        self.is_canceled = False
         self.result = []
 
     def _validate_inputs(
@@ -96,6 +99,16 @@ class AStarSearch:
             raise TypeError
         if len(image) == 0 or len(start_point) == 0 or len(goal_point) == 0:
             raise ValueError
+
+    @property
+    def is_canceled(self) -> bool:
+        return self._is_canceled
+
+    @is_canceled.setter
+    def is_canceled(self, value: bool):
+        if value is None:
+            raise TypeError
+        self._is_canceled = value
 
     def search(self) -> List[np.ndarray]:
         """Function that performs A star search
@@ -122,6 +135,8 @@ class AStarSearch:
         f_scores[tuple(self.start_point)] = start_node.f_score
         
         while not open_set.empty():
+            if self.is_canceled:
+                break
             current_node = open_set.get()[2]
             current_coordinates = tuple(current_node.point)
             if current_coordinates in close_set_hash:
@@ -144,6 +159,10 @@ class AStarSearch:
                     count += 1
                     open_set.put((neighbor.f_score, count, neighbor))
                     open_set_hash.add(neighbor_coordinates)
+                    if self.open_nodes is not None:
+                        # add to our queue
+                        # can be monitored from caller to update plots
+                        self.open_nodes.put(neighbor_coordinates)
                 else:
                     if neighbor.f_score < f_scores[neighbor_coordinates]:
                         f_scores[neighbor_coordinates] = neighbor.f_score
