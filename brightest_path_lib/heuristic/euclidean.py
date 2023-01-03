@@ -1,16 +1,17 @@
 from brightest_path_lib.heuristic import Heuristic
 import math
 import numpy as np
+from typing import Tuple
 
 class Euclidean(Heuristic):
     """heuristic cost estimation using Euclidean distance from current point to goal point
 
     Parameters
     ----------
-    scale : numpy ndarray
-        the scale of the image's axes. For example [1.0 1.0] for a 2D image.
-        - for 2D points, the order of coordinates is: (x, y)
-        - for 3D points, the order of coordinates is: (x, y, z)
+    scale : Tuple
+        the scale of the image's axes. For example (1.0 1.0) for a 2D image.
+        - for 2D points, the order of scale is: (x, y)
+        - for 3D points, the order of scale is: (x, y, z)
     
     Attributes
     ----------
@@ -23,7 +24,7 @@ class Euclidean(Heuristic):
 
     """
 
-    def __init__(self, scale: np.ndarray):
+    def __init__(self, scale: Tuple):
         if scale is None:
             raise TypeError
         if len(scale) == 0:
@@ -59,16 +60,18 @@ class Euclidean(Heuristic):
         By including the scale in the calculation of distance to the goal we
         can get an accurate cost.
 
-        - for 2D points, the order of coordinates is: (x, y)
+        - for 2D points, the order of coordinates is: (y, x)
         - for 3D points, the order of coordinates is: (z, x, y)
         """
         if current_point is None or goal_point is None:
             raise TypeError
         if (len(current_point) == 0 or len(goal_point) == 0) or (len(current_point) != len(goal_point)):
             raise ValueError
-        
-        current_x, current_y, current_z = current_point[0], current_point[1], 0
-        goal_x, goal_y, goal_z = goal_point[0], goal_point[1], 0
+
+        # current_x, current_y, current_z = current_point[0], current_point[1], 0
+        current_x, current_y, current_z = current_point[1], current_point[0], 0
+        # goal_x, goal_y, goal_z = goal_point[0], goal_point[1], 0
+        goal_x, goal_y, goal_z = goal_point[1], goal_point[0], 0
 
         if len(current_point) == len(goal_point) == 3:
             current_z, current_x, current_y = current_point[0], current_point[1], current_point[2]

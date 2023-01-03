@@ -46,11 +46,10 @@ class ImageStats:
             self.y_max = image.shape[1] - 1
             self.x_max = image.shape[2] - 1
         elif len(image.shape) == 2:
+            # will be in the form (y, x)
             self.z_max = 0
             self.y_max = image.shape[0] - 1
             self.x_max = image.shape[1] - 1
-            # self.x_max = len(image[0]) - 1
-            # self.y_max = len(image) - 1
 
     @property
     def min_intensity(self) -> float:

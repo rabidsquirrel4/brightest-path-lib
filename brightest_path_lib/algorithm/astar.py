@@ -1,8 +1,8 @@
 from collections import defaultdict
 import math
 import numpy as np
-from queue import PriorityQueue
-from typing import List
+from queue import PriorityQueue, Queue
+from typing import List, Tuple
 from brightest_path_lib.cost import Reciprocal
 from brightest_path_lib.heuristic import Euclidean
 from brightest_path_lib.image import ImageStats
@@ -19,10 +19,16 @@ class AStarSearch:
         the 2D/3D image on which we will run an A star search
     start_point : numpy ndarray
         the 2D/3D coordinates of the starting point (could be a pixel or a voxel)
+        For 2D images, the coordinates are of the form (y, x)
+        For 2D images, the coordinates are of the form (z, x, y)
     goal_point : numpy ndarray
         the 2D/3D coordinates of the goal point (could be a pixel or a voxel)
-    scale : float
-        the scale of the image; defaults to 1.0 if image is not zoomed in/out
+        For 2D images, the coordinates are of the form (y, x)
+        For 2D images, the coordinates are of the form (z, x, y)
+    scale : Tuple
+        the scale of the image; defaults to (1.0, 1.0), i.e. image is not zoomed in/out
+        For 2D images, the scale is of the form (x, y)
+        For 2D images, the scale is of the form (x, y, z)
     cost_function : Enum CostFunction
         this enum value specifies the cost function to be used for computing 
         the cost of moving to a new point
@@ -41,8 +47,8 @@ class AStarSearch:
         the coordinates of the start point
     goal_point : numpy ndarray
         the coordinates of the goal point
-    scale : float
-        the scale of the image; defaults to 1.0 if image is not zoomed in/out
+    scale : Tuple
+        the scale of the image; defaults to (1.0, 1.0), i.e. image is not zoomed in/out
     cost_function : Cost
         the cost function to be used for computing the cost of moving 
         to a new point
@@ -62,9 +68,10 @@ class AStarSearch:
         image: np.ndarray,
         start_point: np.ndarray,
         goal_point: np.ndarray,
-        scale: np.ndarray = np.array([1.0, 1.0]),
+        scale: Tuple = (1.0, 1.0),
         cost_function: CostFunction = CostFunction.RECIPROCAL,
-        heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN
+        heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN,
+        open_nodes: Queue = None
     ):
 
         self._validate_inputs(image, start_point, goal_point)
@@ -74,6 +81,7 @@ class AStarSearch:
         self.start_point = start_point
         self.goal_point = goal_point
         self.scale = scale
+        self.open_nodes = open_nodes
 
         if cost_function == CostFunction.RECIPROCAL:
             self.cost_function = Reciprocal(
@@ -83,6 +91,8 @@ class AStarSearch:
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
             self.heuristic_function = Euclidean(scale=self.scale)
         
+        self.is_canceled = False
+        self.found_path = False
         self.result = []
 
     def _validate_inputs(
@@ -96,6 +106,26 @@ class AStarSearch:
             raise TypeError
         if len(image) == 0 or len(start_point) == 0 or len(goal_point) == 0:
             raise ValueError
+
+    @property
+    def found_path(self) -> bool:
+        return self._found_path
+
+    @found_path.setter
+    def found_path(self, value: bool):
+        if value is None:
+            raise TypeError
+        self._found_path = value
+
+    @property
+    def is_canceled(self) -> bool:
+        return self._is_canceled
+
+    @is_canceled.setter
+    def is_canceled(self, value: bool):
+        if value is None:
+            raise TypeError
+        self._is_canceled = value
 
     def search(self) -> List[np.ndarray]:
         """Function that performs A star search
@@ -122,6 +152,8 @@ class AStarSearch:
         f_scores[tuple(self.start_point)] = start_node.f_score
         
         while not open_set.empty():
+            if self.is_canceled:
+                break
             current_node = open_set.get()[2]
             current_coordinates = tuple(current_node.point)
             if current_coordinates in close_set_hash:
@@ -132,6 +164,7 @@ class AStarSearch:
             if self._found_goal(current_node.point):
                 print("Found goal!")
                 self._construct_path_from(current_node)
+                self.found_path = True
                 break
 
             neighbors = self._find_neighbors_of(current_node)
@@ -144,6 +177,10 @@ class AStarSearch:
                     count += 1
                     open_set.put((neighbor.f_score, count, neighbor))
                     open_set_hash.add(neighbor_coordinates)
+                    if self.open_nodes is not None:
+                        # add to our queue
+                        # can be monitored from caller to update plots
+                        self.open_nodes.put(neighbor_coordinates)
                 else:
                     if neighbor.f_score < f_scores[neighbor_coordinates]:
                         f_scores[neighbor_coordinates] = neighbor.f_score
@@ -203,7 +240,7 @@ class AStarSearch:
         diagonal neighbors: top-left, top-right, bottom-left, bottom-right
         - Of course, we need to check for invalid cases where we can't move
         in these directions
-        - 2D coordinates are of the type (x, y)
+        - 2D coordinates are of the type (y, x)
         """
         neighbors = []
         steps = [-1, 0, 1]
@@ -212,19 +249,23 @@ class AStarSearch:
                 if xdiff == ydiff == 0:
                     continue
 
-                new_x = node.point[0] + xdiff
+                new_x = node.point[1] + xdiff
+                # new_x = node.point[0] + xdiff
                 if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
                     continue
                     
-                new_y = node.point[1] + ydiff
+                new_y = node.point[0] + ydiff
+                # new_y = node.point[1] + ydiff
                 if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
                     continue
 
-                new_point = np.array([new_x, new_y])
+                # new_point = np.array([new_x, new_y])
+                new_point = np.array([new_y, new_x])
 
                 h_for_new_point = self._estimate_cost_to_goal(new_point)
 
-                intensity_at_new_point = self.image[new_x, new_y]
+                intensity_at_new_point = self.image[new_y, new_x]
+
                 cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
@@ -235,7 +276,7 @@ class AStarSearch:
                     g_score=g_for_new_point,
                     h_score=h_for_new_point,
                     predecessor=node
-                ) 
+                )
 
                 neighbors.append(neighbor)
 
