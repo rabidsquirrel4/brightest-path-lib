@@ -37,11 +37,13 @@ class ImageStats:
 
         self.min_intensity = np.min(image)
         self.max_intensity = np.max(image)
+
         self.x_min = 0
         self.y_min = 0
         self.z_min = 0
+
         if len(image.shape) == 3:
-            # will be in the form (z, x, y) 
+            # will be in the form (z, y, x)
             self.z_max = image.shape[0] - 1
             self.y_max = image.shape[1] - 1
             self.x_max = image.shape[2] - 1
