@@ -74,8 +74,10 @@ class Euclidean(Heuristic):
         goal_x, goal_y, goal_z = goal_point[1], goal_point[0], 0
 
         if len(current_point) == len(goal_point) == 3:
-            current_z, current_x, current_y = current_point[0], current_point[1], current_point[2]
-            goal_z, goal_x, goal_y = goal_point[0], goal_point[1], goal_point[2]
+            # current_z, current_x, current_y = current_point[0], current_point[1], current_point[2]
+            # goal_z, goal_x, goal_y = goal_point[0], goal_point[1], goal_point[2]
+            current_z, current_y, current_x = current_point[0], current_point[1], current_point[2]
+            goal_z, goal_y, goal_x = goal_point[0], goal_point[1], goal_point[2]
         
         x_diff = (goal_x - current_x) * self.scale_x
         y_diff = (goal_y - current_y) * self.scale_y

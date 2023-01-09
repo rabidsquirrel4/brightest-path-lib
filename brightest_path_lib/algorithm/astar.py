@@ -57,6 +57,13 @@ class AStarSearch:
         the heuristic function to be used to compute the estimated
         cost of moving from a point to the goal
         Default type is Euclidean
+    is_canceled : bool
+        should be set to True if the search needs to be stopped;
+        false by default
+    open_nodes : Queue
+        contains a list of points that are in the open set;
+        can be used by the calling application to show a visualization
+        of where the algorithm is searching currently
     result : List[numpy ndarray]
         the result of the A star search containing the list of actual
         points that constitute the brightest path from start_point to
@@ -78,8 +85,8 @@ class AStarSearch:
 
         self.image = image
         self.image_stats = ImageStats(image)
-        self.start_point = start_point
-        self.goal_point = goal_point
+        self.start_point = np.round(start_point).astype(int)
+        self.goal_point = np.round(goal_point).astype(int)
         self.scale = scale
         self.open_nodes = open_nodes
 
@@ -315,28 +322,27 @@ class AStarSearch:
                     if xdiff == ydiff == zdiff == 0:
                         continue
 
-                    # new_z = node.point[2] + zdiff
                     new_z = node.point[0] + zdiff
                     if new_z < self.image_stats.z_min or new_z > self.image_stats.z_max:
                         continue
 
-                    # new_x = node.point[0] + xdiff
-                    new_x = node.point[1] + xdiff
-                    if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                        continue
-                        
-                    # new_y = node.point[1] + ydiff
-                    new_y = node.point[2] + ydiff
+                    # new_y = node.point[2] + ydiff
+                    new_y = node.point[1] + ydiff
                     if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
                         continue
 
-                    # new_point = np.array([new_x, new_y, new_z])
-                    new_point = np.array([new_z, new_x, new_y])
+                    # new_x = node.point[1] + xdiff
+                    new_x = node.point[2] + xdiff
+                    if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                        continue
+
+                    #new_point = np.array([new_z, new_x, new_y])
+                    new_point = np.array([new_z, new_y, new_x])
 
                     h_for_new_point = self._estimate_cost_to_goal(new_point)
 
-                    # intensity_at_new_point = self.image[new_x, new_y, new_z]
-                    intensity_at_new_point = self.image[new_z, new_x, new_y]
+                    #intensity_at_new_point = self.image[new_z, new_x, new_y]
+                    intensity_at_new_point = self.image[new_z, new_y, new_x]
                     cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
