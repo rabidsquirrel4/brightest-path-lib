@@ -6,7 +6,7 @@ from threading import Thread
 import tifffile
 from typing import List
 
-from brightest_path_lib.algorithm import AStarSearch
+from brightest_path_lib.algorithm import AStarSearch, NBAStarSearch
 
 from skimage import data
 import numpy as np
@@ -29,6 +29,28 @@ class AStarThread(Thread):
     def run(self):
         """
         run A* tracing algorithm
+        """
+        print("Searching...")
+        self.search_algorithm.search()
+        print("Done")
+
+
+class NBAStarThread(Thread):
+    def __init__(self,
+        image : np.ndarray,
+        start_point : np.ndarray,
+        goal_point : np.ndarray,
+        queue = None):
+        super().__init__(daemon=True)
+        self.queue = queue
+        self.search_algorithm = NBAStarSearch(image, start_point=start_point, goal_point=goal_point, open_nodes=queue)
+
+    def cancel(self):
+        self.search_algorithm.is_canceled = True
+
+    def run(self):
+        """
+        run NBA* tracing algorithm
         """
         print("Searching...")
         self.search_algorithm.search()
@@ -67,7 +89,8 @@ def plot_brightest_path():
     _plot_image(image, start_point, goal_point)
 
     queue = Queue()
-    search_thread = AStarThread(image, start_point, goal_point, queue)
+    # search_thread = AStarThread(image, start_point, goal_point, queue)
+    search_thread = NBAStarThread(image, start_point, goal_point, queue)
     search_thread.start()  # start the thread, internally Python calls tt.run()
 
     _updateInterval = 100  # wait for this number of results and update plot

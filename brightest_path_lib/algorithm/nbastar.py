@@ -2,12 +2,12 @@ from collections import defaultdict
 import math
 import numpy as np
 from queue import PriorityQueue, Queue
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from brightest_path_lib.cost import Reciprocal
 from brightest_path_lib.heuristic import Euclidean
 from brightest_path_lib.image import ImageStats
 from brightest_path_lib.input import CostFunction, HeuristicFunction
-from brightest_path_lib.node import Node
+from brightest_path_lib.node import Node, BidirectionalNode
 
 
 class NBAStarSearch:
@@ -89,6 +89,11 @@ class NBAStarSearch:
         self.goal_point = np.round(goal_point).astype(int)
         self.scale = scale
         self.open_nodes = open_nodes
+        self.open_set_from_start = PriorityQueue()
+        self.open_set_from_goal = PriorityQueue()
+        self.node_at_coordinates: Dict[Tuple, BidirectionalNode] = {}
+        self.close_set_hash_from_start = set() # hashset contains tuple of node coordinates already been visited
+        self.close_set_hash_from_goal = set()
 
         if cost_function == CostFunction.RECIPROCAL:
             self.cost_function = Reciprocal(
@@ -98,6 +103,8 @@ class NBAStarSearch:
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
             self.heuristic_function = Euclidean(scale=self.scale)
         
+        self.best_path_length = float("inf")
+        self.touch_node: BidirectionalNode = None
         self.is_canceled = False
         self.found_path = False
         self.result = []
@@ -143,72 +150,79 @@ class NBAStarSearch:
             the list containing the 2D/3D point coordinates
             that constitute the brightest path between the
             start_point and the goal_point
-        """
-        count = 0
-        open_set = PriorityQueue()
-        start_node = Node(
-            point=self.start_point, 
-            g_score=0, 
-            h_score=self._estimate_cost_to_goal(self.start_point), 
-            predecessor=None
-            )
-        open_set.put((0, count, start_node)) # f_score, count: priority of occurence, current node
-        open_set_hash = {tuple(self.start_point)} # hashset contains tuple of node coordinates to be visited
-        close_set_hash = set() # hashset contains tuple of node coordinates already been visited
-        f_scores = defaultdict(self._default_value) # key: tuple of node coordinates, value: f_score
-        f_scores[tuple(self.start_point)] = start_node.f_score
         
-        while not open_set.empty():
+        # Steps:
+
+        """
+        start_node = BidirectionalNode(point=self.start_point)
+        goal_node = BidirectionalNode(point=self.goal_point)
+
+        start_node.g_score_from_start = 0.0
+        goal_node.g_score_from_goal = 0.0
+
+        # since g_score from start to itself is 0, best f_score from start = h_score from start to goal
+        best_f_score_from_start = self._estimate_cost_to_goal(self.start_point, self.goal_point)
+        start_node.f_score_from_start = best_f_score_from_start
+
+        # since g_score from goal to itself is 0, best f_score from goal = h_score from goal to start
+        best_f_score_from_goal = self._estimate_cost_to_goal(self.goal_point, self.start_point)
+        goal_node.f_score_from_goal = best_f_score_from_goal
+
+        self.open_set_from_start.put((0, start_node)) # f_score, count: priority of occurence, current node
+        self.open_set_from_goal.put((0, goal_node)) # f_score, count: priority of occurence, current node
+
+        self.node_at_coordinates[tuple(self.start_point)] = start_node
+        self.node_at_coordinates[tuple(self.goal_point)] = goal_node
+        
+        while not self.open_set_from_start.empty() and not self.open_set_from_goal.empty():
             if self.is_canceled:
                 break
-            current_node = open_set.get()[2]
-            current_coordinates = tuple(current_node.point)
-            if current_coordinates in close_set_hash:
-                continue
-            
-            open_set_hash.remove(current_coordinates)
 
-            if self._found_goal(current_node.point):
-                print("Found goal!")
-                self._construct_path_from(current_node)
-                self.found_path = True
-                break
+            from_start = self.open_set_from_start.qsize() < self.open_set_from_goal.qsize()
+            if from_start:
+                current_node = self.open_set_from_start.get()[1] # get the node object
+                current_coordinates = tuple(current_node.point)
+                self.close_set_hash_from_start.add(current_coordinates)
+                
+                best_f_score_from_start = current_node.f_score_from_start
+                current_node_f_score = current_node.g_score_from_start + self._estimate_cost_to_goal(
+                    current_point=current_node.point, 
+                    goal_point=self.goal_point
+                )
 
-            neighbors = self._find_neighbors_of(current_node)
-            for neighbor in neighbors:
-                neighbor_coordinates = tuple(neighbor.point)
-                if neighbor_coordinates in close_set_hash:
-                    # this neighbor has already been visited
+                if (current_node_f_score >= self.best_path_length) or ((current_node.g_score_from_start + best_f_score_from_goal - self._estimate_cost_to_goal(current_node.point, self.start_point)) >= self.best_path_length):
+                    # reject the current node
                     continue
-                if neighbor_coordinates not in open_set_hash:
-                    count += 1
-                    open_set.put((neighbor.f_score, count, neighbor))
-                    open_set_hash.add(neighbor_coordinates)
-                    if self.open_nodes is not None:
-                        # add to our queue
-                        # can be monitored from caller to update plots
-                        self.open_nodes.put(neighbor_coordinates)
                 else:
-                    if neighbor.f_score < f_scores[neighbor_coordinates]:
-                        f_scores[neighbor_coordinates] = neighbor.f_score
-                        count += 1
-                        open_set.put((neighbor.f_score, count, neighbor))
-            
-            close_set_hash.add(current_coordinates)
+                    # stabilize the current node
+                    self._expand_neighbors_of(current_node, from_start)
+            else:
+                current_node = self.open_set_from_goal.get()[1]
+                current_coordinates = tuple(current_node.point)
+                self.close_set_hash_from_goal.add(current_coordinates)
+                
+                best_f_score_from_goal = current_node.f_score_from_goal
+                current_node_f_score = current_node.g_score_from_goal + self._estimate_cost_to_goal(
+                    current_point=current_node.point, 
+                    goal_point=self.start_point
+                )
 
+                if current_node_f_score >= self.best_path_length or ((current_node.g_score_from_goal + best_f_score_from_start - self._estimate_cost_to_goal(current_node.point, self.goal_point)) >= self.best_path_length):
+                    # reject the current node
+                    continue
+                else:
+                    # stabilize the current node
+                    self._expand_neighbors_of(current_node, from_start)
+
+        if not self.touch_node:
+            print("NBA* Search finished without finding the path")
+            return []
+        
+        self._construct_path()
+        self.found_path = True
         return self.result
     
-    def _default_value(self) -> float:
-        """the default value f_score of all nodes in the image
-
-        Returns
-        -------
-        float
-            returns infinity as the default f_score
-        """
-        return float("inf")
-    
-    def _find_neighbors_of(self, node: Node) -> List[Node]:
+    def _expand_neighbors_of(self, node: BidirectionalNode, from_start: bool):
         """Finds the neighbors of a node (2D/3D)
 
         Parameters
@@ -222,11 +236,11 @@ class NBAStarSearch:
             a list of nodes that are the neighbors of the given node
         """
         if len(node.point) == 2:
-            return self._find_2D_neighbors_of(node)
+            return self._expand_2D_neighbors_of(node, from_start)
         else:
-            return self._find_3D_neighbors_of(node)
+            return self._expand_3D_neighbors_of(node, from_start)
     
-    def _find_2D_neighbors_of(self, node: Node) -> List[Node]:
+    def _expand_2D_neighbors_of(self, node: BidirectionalNode, from_start: bool):
         """Finds the neighbors of a 2D node
 
         Parameters
@@ -249,47 +263,35 @@ class NBAStarSearch:
         in these directions
         - 2D coordinates are of the type (y, x)
         """
-        neighbors = []
         steps = [-1, 0, 1]
         for xdiff in steps:
+            new_x = node.point[1] + xdiff
+            if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                continue
+            
             for ydiff in steps:
                 if xdiff == ydiff == 0:
                     continue
 
-                new_x = node.point[1] + xdiff
-                # new_x = node.point[0] + xdiff
-                if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                    continue
-                    
                 new_y = node.point[0] + ydiff
-                # new_y = node.point[1] + ydiff
                 if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
                     continue
 
-                # new_point = np.array([new_x, new_y])
                 new_point = np.array([new_y, new_x])
 
-                h_for_new_point = self._estimate_cost_to_goal(new_point)
-
+                current_g_score = node.get_g(from_start)
                 intensity_at_new_point = self.image[new_y, new_x]
 
                 cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
-                g_for_new_point = node.g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff)) * cost_of_moving_to_new_point
-                neighbor = Node(
-                    point=new_point,
-                    g_score=g_for_new_point,
-                    h_score=h_for_new_point,
-                    predecessor=node
-                )
+                tentative_g_score = current_g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff)) * cost_of_moving_to_new_point
+                tentative_h_score = self._estimate_cost_to_goal(new_point, self.goal_point if from_start else self.start_point)
+                tentative_f_score = tentative_g_score + tentative_h_score
+                self.is_touch_node(new_point, tentative_g_score, tentative_f_score, node, from_start)
 
-                neighbors.append(neighbor)
-
-        return neighbors
-
-    def _find_3D_neighbors_of(self, node: Node) -> List[Node]:
+    def _expand_3D_neighbors_of(self, node: BidirectionalNode, from_start: bool):
         """Finds the neighbors of a 3D node
 
         Parameters
@@ -313,11 +315,18 @@ class NBAStarSearch:
         or on the edges of the image)
         - 3D coordinates are of the form (z, x, y)
         """
-        neighbors = []
         steps = [-1, 0, 1]
         
         for xdiff in steps:
+            new_x = node.point[2] + xdiff
+            if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                continue
+
             for ydiff in steps:
+                new_y = node.point[1] + ydiff
+                if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
+                    continue
+
                 for zdiff in steps:
                     if xdiff == ydiff == zdiff == 0:
                         continue
@@ -326,56 +335,60 @@ class NBAStarSearch:
                     if new_z < self.image_stats.z_min or new_z > self.image_stats.z_max:
                         continue
 
-                    # new_y = node.point[2] + ydiff
-                    new_y = node.point[1] + ydiff
-                    if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
-                        continue
-
-                    # new_x = node.point[1] + xdiff
-                    new_x = node.point[2] + xdiff
-                    if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                        continue
-
-                    #new_point = np.array([new_z, new_x, new_y])
                     new_point = np.array([new_z, new_y, new_x])
 
-                    h_for_new_point = self._estimate_cost_to_goal(new_point)
-
-                    #intensity_at_new_point = self.image[new_z, new_x, new_y]
+                    current_g_score = node.get_g(from_start)
                     intensity_at_new_point = self.image[new_z, new_y, new_x]
+
                     cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
-                    g_for_new_point = node.g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff) + (zdiff*zdiff)) * cost_of_moving_to_new_point
-                    neighbor = Node(
-                        point=new_point,
-                        g_score=g_for_new_point,
-                        h_score=h_for_new_point,
-                        predecessor=node
-                    ) 
+                    tentative_g_score = current_g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff) + (zdiff*zdiff)) * cost_of_moving_to_new_point
+                    tentative_h_score = self._estimate_cost_to_goal(new_point, self.goal_point if from_start else self.start_point)
+                    tentative_f_score = tentative_g_score + tentative_h_score
+                    self.is_touch_node(new_point, tentative_g_score, tentative_f_score, node, from_start)
 
-                    neighbors.append(neighbor)
-                
-        return neighbors
-    
-    def _found_goal(self, point: np.ndarray) -> bool:
-        """Checks if the goal point is reached
+    def is_touch_node(
+        self,
+        new_point: np.ndarray,
+        tentative_g_score: float,
+        tentative_f_score: float,
+        predecessor: BidirectionalNode,
+        from_start: bool
+    ):
+        open_queue = self.open_set_from_start if from_start else self.open_set_from_goal
+        new_point_coordinates = tuple(new_point)
+        already_there = self.node_at_coordinates.get(new_point_coordinates, None)
 
-        Parameters
-        ----------
-        point : numpy ndarray
-            the point whose coordinates are to be compared to the goal
-            point for equality
+        if not already_there:
+            new_node = BidirectionalNode(new_point)
+            new_node.set_g(tentative_g_score, from_start)
+            new_node.set_f(tentative_f_score, from_start)
+            new_node.set_predecessor(predecessor, from_start)
+            open_queue.put((tentative_f_score, new_node))
+            self.open_nodes.put(new_point_coordinates)
+            self.node_at_coordinates[new_point_coordinates] = new_node
+        elif self._in_closed_set(new_point_coordinates, from_start):
+            return
+        elif already_there.get_f(from_start) > tentative_f_score:
+            already_there.set_g(tentative_g_score, from_start)
+            already_there.set_f(tentative_f_score, from_start)
+            already_there.set_predecessor(predecessor, from_start)
+            open_queue.put((tentative_f_score, already_there))
+            self.open_nodes.put(new_point_coordinates)
+            path_length = already_there.g_score_from_start + already_there.g_score_from_goal
+            if path_length < self.best_path_length:
+                self.best_path_length = path_length
+                self.touch_node = already_there
 
-        Returns
-        -------
-        bool
-            returns True if the goal is reached; False otherwise
-        """
-        return np.array_equal(point, self.goal_point)
+    def _in_closed_set(self, coordinates: Tuple, from_start: bool) -> bool:
+        if from_start:
+            return coordinates in self.close_set_hash_from_start
+        else:
+            return coordinates in self.close_set_hash_from_goal
 
-    def _estimate_cost_to_goal(self, point: np.ndarray) -> float:
+    def _estimate_cost_to_goal(self, current_point: np.ndarray, goal_point: np.ndarray) -> float:
         """Estimates the heuristic cost (h_score) between a point
         and the goal
 
@@ -391,19 +404,18 @@ class NBAStarSearch:
             returns the heuristic cost between the point and goal point
         """
         return self.cost_function.minimum_step_cost() * self.heuristic_function.estimate_cost_to_goal(
-            current_point=point, goal_point=self.goal_point
+            current_point=current_point, goal_point=goal_point
         )
+    
+    def _construct_path(self):
+        current_node = self.touch_node
 
-    def _construct_path_from(self, node: Node):
-        """stores the coodinates of nodes that constitute the brightest path 
-        from the goal_point to the start_point once the goal is reached.
+        while not np.array_equal(current_node.point, self.start_point):
+            self.result.insert(0, current_node.point)
+            current_node = current_node.predecessor_from_start
+             
+        current_node = self.touch_node
 
-        Parameters
-        ----------
-        node : Node
-            a node that lies on the brightest path
-        """
-        while node is not None:
-            self.result.insert(0, node.point)
-            node = node.predecessor
-        
+        while not np.array_equal(current_node.point, self.goal_point):
+            self.result.append(current_node.point)
+            current_node = current_node.predecessor_from_goal

@@ -53,10 +53,12 @@ class BidirectionalNode:
     def __init__(
         self,
         point: np.ndarray,
-        g_score_from_start: float,
-        g_score_from_goal: float,
-        h_score_from_start: float,
-        h_score_from_goal: float,
+        g_score_from_start: float = float('inf'),
+        g_score_from_goal: float = float('inf'),
+        h_score_from_start: float = float('inf'),
+        h_score_from_goal: float = float('inf'),
+        f_score_from_start: float = float('inf'),
+        f_score_from_goal: float = float('inf'),
         predecessor_from_start: 'BidirectionalNode' = None,
         predecessor_from_goal: 'BidirectionalNode' = None
     ):
@@ -65,8 +67,8 @@ class BidirectionalNode:
         self.g_score_from_goal = g_score_from_goal
         self.h_score_from_start = h_score_from_start
         self.h_score_from_goal = h_score_from_goal
-        self.f_score_from_start = self.g_score_from_start + self.h_score_from_start
-        self.f_score_from_goal = self.g_score_from_goal + self.h_score_from_goal
+        self.f_score_from_start = f_score_from_start
+        self.f_score_from_goal = f_score_from_goal
         self.predecessor_from_start = predecessor_from_start
         self.predecessor_from_goal = predecessor_from_goal
     
@@ -88,8 +90,6 @@ class BidirectionalNode:
     
     @g_score_from_start.setter
     def g_score_from_start(self, value: float):
-        if value is None:
-            raise TypeError
         self._g_score_from_start = value
     
     @property
@@ -98,8 +98,6 @@ class BidirectionalNode:
     
     @g_score_from_goal.setter
     def g_score_from_goal(self, value: float):
-        if value is None:
-            raise TypeError
         self._g_score_from_goal = value
     
     @property
@@ -108,18 +106,14 @@ class BidirectionalNode:
     
     @h_score_from_start.setter
     def h_score_from_start(self, value: float):
-        if value is None:
-            raise TypeError
         self._h_score_from_start = value
     
     @property
     def h_score_from_goal(self):
         return self._h_score_from_goal
     
-    @h_score_from_start.setter
+    @h_score_from_goal.setter
     def h_score_from_goal(self, value: float):
-        if value is None:
-            raise TypeError
         self._h_score_from_goal = value
     
     @property
@@ -128,18 +122,14 @@ class BidirectionalNode:
     
     @f_score_from_start.setter
     def f_score_from_start(self, value: float):
-        if value is None:
-            raise TypeError
         self._f_score_from_start = value
     
     @property
     def f_score_from_goal(self):
         return self._f_score_from_goal
     
-    @f_score_from_start.setter
+    @f_score_from_goal.setter
     def f_score_from_goal(self, value: float):
-        if value is None:
-            raise TypeError
         self._f_score_from_goal = value
     
     @property
@@ -148,8 +138,6 @@ class BidirectionalNode:
     
     @predecessor_from_start.setter
     def predecessor_from_start(self, value: float):
-        if value is None:
-            raise TypeError
         self._predecessor_from_start = value
     
     @property
@@ -158,6 +146,28 @@ class BidirectionalNode:
     
     @predecessor_from_goal.setter
     def predecessor_from_goal(self, value: float):
-        if value is None:
-            raise TypeError
         self._predecessor_from_goal = value
+    
+    def get_g(self, from_start: bool) -> float:
+        return self.g_score_from_start if from_start else self.g_score_from_goal
+    
+    def get_f(self, from_start: bool) -> float:
+        return self.f_score_from_start if from_start else self.f_score_from_goal
+    
+    def set_g(self, g_score: float, from_start: bool):
+        if from_start:
+            self.g_score_from_start = g_score
+        else:
+            self.g_score_from_goal = g_score
+    
+    def set_f(self, f_score: float, from_start: bool):
+        if from_start:
+            self.f_score_from_start = f_score
+        else:
+            self.f_score_from_goal = f_score
+    
+    def set_predecessor(self, set_predecessor: float, from_start: bool):
+        if from_start:
+            self.predecessor_from_start = set_predecessor
+        else:
+            self.predecessor_from_goal = set_predecessor
