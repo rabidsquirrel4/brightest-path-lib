@@ -89,11 +89,12 @@ class NBAStarSearch:
         self.goal_point = np.round(goal_point).astype(int)
         self.scale = scale
         self.open_nodes = open_nodes
+        self.node_priority_from_start, self.node_priority_from_goal = 0, 0
         self.open_set_from_start = PriorityQueue()
         self.open_set_from_goal = PriorityQueue()
         self.node_at_coordinates: Dict[Tuple, BidirectionalNode] = {}
-        self.close_set_hash_from_start = set() # hashset contains tuple of node coordinates already been visited
-        self.close_set_hash_from_goal = set()
+        # self.close_set_hash_from_start = set() # hashset contains tuple of node coordinates already been visited
+        # self.close_set_hash_from_goal = set()
 
         if cost_function == CostFunction.RECIPROCAL:
             self.cost_function = Reciprocal(
@@ -168,8 +169,8 @@ class NBAStarSearch:
         best_f_score_from_goal = self._estimate_cost_to_goal(self.goal_point, self.start_point)
         goal_node.f_score_from_goal = best_f_score_from_goal
 
-        self.open_set_from_start.put((0, start_node)) # f_score, count: priority of occurence, current node
-        self.open_set_from_goal.put((0, goal_node)) # f_score, count: priority of occurence, current node
+        self.open_set_from_start.put((0, self.node_priority_from_start, start_node)) # f_score, count: priority of occurence, current node
+        self.open_set_from_goal.put((0, self.node_priority_from_goal, goal_node)) # f_score, count: priority of occurence, current node
 
         self.node_at_coordinates[tuple(self.start_point)] = start_node
         self.node_at_coordinates[tuple(self.goal_point)] = goal_node
@@ -180,9 +181,9 @@ class NBAStarSearch:
 
             from_start = self.open_set_from_start.qsize() < self.open_set_from_goal.qsize()
             if from_start:
-                current_node = self.open_set_from_start.get()[1] # get the node object
-                current_coordinates = tuple(current_node.point)
-                self.close_set_hash_from_start.add(current_coordinates)
+                current_node = self.open_set_from_start.get()[2] # get the node object
+                #current_coordinates = tuple(current_node.point)
+                #self.close_set_hash_from_start.add(current_coordinates)
                 
                 best_f_score_from_start = current_node.f_score_from_start
                 current_node_f_score = current_node.g_score_from_start + self._estimate_cost_to_goal(
@@ -197,9 +198,9 @@ class NBAStarSearch:
                     # stabilize the current node
                     self._expand_neighbors_of(current_node, from_start)
             else:
-                current_node = self.open_set_from_goal.get()[1]
-                current_coordinates = tuple(current_node.point)
-                self.close_set_hash_from_goal.add(current_coordinates)
+                current_node = self.open_set_from_goal.get()[2]
+                #current_coordinates = tuple(current_node.point)
+                #self.close_set_hash_from_goal.add(current_coordinates)
                 
                 best_f_score_from_goal = current_node.f_score_from_goal
                 current_node_f_score = current_node.g_score_from_goal + self._estimate_cost_to_goal(
@@ -358,6 +359,7 @@ class NBAStarSearch:
         from_start: bool
     ):
         open_queue = self.open_set_from_start if from_start else self.open_set_from_goal
+        
         new_point_coordinates = tuple(new_point)
         already_there = self.node_at_coordinates.get(new_point_coordinates, None)
 
@@ -366,21 +368,34 @@ class NBAStarSearch:
             new_node.set_g(tentative_g_score, from_start)
             new_node.set_f(tentative_f_score, from_start)
             new_node.set_predecessor(predecessor, from_start)
-            open_queue.put((tentative_f_score, new_node))
-            self.open_nodes.put(new_point_coordinates)
+            self._increment_node_priority(from_start)
+            open_queue.put((tentative_f_score, self._get_node_priority(from_start), new_node))
+            if self.open_nodes:
+                self.open_nodes.put(new_point_coordinates)
             self.node_at_coordinates[new_point_coordinates] = new_node
-        elif self._in_closed_set(new_point_coordinates, from_start):
-            return
+        # elif self._in_closed_set(new_point_coordinates, from_start):
+        #     return
         elif already_there.get_f(from_start) > tentative_f_score:
             already_there.set_g(tentative_g_score, from_start)
             already_there.set_f(tentative_f_score, from_start)
             already_there.set_predecessor(predecessor, from_start)
-            open_queue.put((tentative_f_score, already_there))
-            self.open_nodes.put(new_point_coordinates)
+            self._increment_node_priority(from_start)
+            open_queue.put((tentative_f_score, self._get_node_priority(from_start), already_there))
+            if self.open_nodes:
+                self.open_nodes.put(new_point_coordinates)
             path_length = already_there.g_score_from_start + already_there.g_score_from_goal
             if path_length < self.best_path_length:
                 self.best_path_length = path_length
                 self.touch_node = already_there
+    
+    def _get_node_priority(self, from_start: bool) -> int:
+        return self.node_priority_from_start if from_start else self.node_priority_from_goal
+    
+    def _increment_node_priority(self, from_start: bool):
+        if from_start:
+            self.node_priority_from_start += 1
+        else:
+            self.node_priority_from_goal += 1
 
     def _in_closed_set(self, coordinates: Tuple, from_start: bool) -> bool:
         if from_start:

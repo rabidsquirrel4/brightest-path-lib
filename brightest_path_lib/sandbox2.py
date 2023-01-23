@@ -4,6 +4,7 @@ sys.path.append("/Users/vasudhajha/Documents/mapmanager/brightest-path-lib")
 from queue import Empty, Queue
 from threading import Thread
 import tifffile
+import time
 from typing import List
 
 from brightest_path_lib.algorithm import AStarSearch, NBAStarSearch
@@ -31,7 +32,11 @@ class AStarThread(Thread):
         run A* tracing algorithm
         """
         print("Searching...")
+        tic = time.perf_counter()
         self.search_algorithm.search()
+        toc = time.perf_counter()
+        print(f"Found brightest path in {toc - tic:0.4f} seconds")
+        print(f"path size: {len(self.search_algorithm.result)}")
         print("Done")
 
 
@@ -53,7 +58,11 @@ class NBAStarThread(Thread):
         run NBA* tracing algorithm
         """
         print("Searching...")
+        tic = time.perf_counter()
         self.search_algorithm.search()
+        toc = time.perf_counter()
+        print(f"Found brightest path in {toc - tic:0.4f} seconds")
+        print(f"path size: {len(self.search_algorithm.result)}")
         print("Done")
 
 
@@ -89,8 +98,9 @@ def plot_brightest_path():
     _plot_image(image, start_point, goal_point)
 
     queue = Queue()
-    # search_thread = AStarThread(image, start_point, goal_point, queue)
-    search_thread = NBAStarThread(image, start_point, goal_point, queue)
+
+    search_thread = AStarThread(image, start_point, goal_point, queue)
+    #search_thread = NBAStarThread(image, start_point, goal_point, queue)
     search_thread.start()  # start the thread, internally Python calls tt.run()
 
     _updateInterval = 100  # wait for this number of results and update plot

@@ -1,7 +1,7 @@
 import sys
 sys.path.append("/Users/vasudhajha/Documents/mapmanager/brightest-path-lib")
 
-from brightest_path_lib.algorithm import AStarSearch
+from brightest_path_lib.algorithm import AStarSearch, NBAStarSearch
 import numpy as np
 import napari
 from skimage import data
@@ -23,16 +23,19 @@ def test_2D_image():
     # astar_search = AStarSearch(
     #     image,
     #     start_point,
-    #     goal_point,
-    #     scale=(1.0, 1.0)
-    # )
+    #     goal_point)
+    # tic = time.perf_counter()
+    # result = astar_search.search()
+    # toc = time.perf_counter()
+    # print(f"Found brightest path in {toc - tic:0.4f} seconds")
+    # print(f"path size: {len(result)}")
 
-    astar_search = AStarSearch(
+    nbastar_search = NBAStarSearch(
         image,
         start_point,
         goal_point)
     tic = time.perf_counter()
-    result = astar_search.search()
+    result = nbastar_search.search()
     toc = time.perf_counter()
     print(f"Found brightest path in {toc - tic:0.4f} seconds")
     print(f"path size: {len(result)}")
@@ -45,13 +48,6 @@ def test_2D_image():
     napari.run()
 
 def test_3D_image():
-    # testing for 3D
-    # threeDImage = data.cells3d()[30]  # grab some data
-    # astar_search = AStarSearch(
-    #     image=threeDImage,
-    #     start_point=np.array([1, 16, 1]), # z, x, y in 3D
-    #     goal_point=np.array([1, 35, 1]),
-    #     )
     image = tifffile.imread('rr30a_s0_ch2.tif')
     start_point = np.array([30, 243, 292]) # (z,y,x)
     goal_point = np.array([30, 221, 434]) # (z,y,x)
@@ -59,18 +55,25 @@ def test_3D_image():
     astar_search = AStarSearch(
         image,
         start_point,
-        goal_point,
-        scale=(1.0, 1.0, 1.0)
+        goal_point
     )
 
+    tic = time.perf_counter()
     result = astar_search.search()
-    print(f"Found path of length {len(result)}")
-    print(result)
+    toc = time.perf_counter()
+    print(f"Found brightest path in {toc - tic:0.4f} seconds")
+    print(f"path size: {len(result)}")
 
-    # viewer = napari.Viewer()
-    # viewer.add_image(threeDImage[:200, :200], colormap='magma')
-    # viewer.add_points(result, size=1, edge_width=1, face_color="green", edge_color="green")
-    # napari.run()
+    # nbastar_search = NBAStarSearch(
+    #     image,
+    #     start_point,
+    #     goal_point
+    # )
+    # tic = time.perf_counter()
+    # result = nbastar_search.search()
+    # toc = time.perf_counter()
+    # print(f"Found brightest path in {toc - tic:0.4f} seconds")
+    # print(f"path size: {len(result)}")
 
     viewer = napari.Viewer()
     viewer.add_image(image)
@@ -79,4 +82,4 @@ def test_3D_image():
     napari.run()
 
 if __name__ == "__main__":
-    test_2D_image()
+    test_3D_image()
