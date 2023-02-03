@@ -3,8 +3,8 @@ import math
 import numpy as np
 from queue import PriorityQueue, Queue
 from typing import List, Tuple
-from brightest_path_lib.cost import Reciprocal
-from brightest_path_lib.heuristic import Euclidean
+from brightest_path_lib.cost import ReciprocalTransonic
+from brightest_path_lib.heuristic import EuclideanTransonic
 from brightest_path_lib.image import ImageStats
 from brightest_path_lib.input import CostFunction, HeuristicFunction
 from brightest_path_lib.node import Node
@@ -91,15 +91,16 @@ class AStarSearch:
         self.open_nodes = open_nodes
 
         if cost_function == CostFunction.RECIPROCAL:
-            self.cost_function = Reciprocal(
+            self.cost_function = ReciprocalTransonic(
                 min_intensity=self.image_stats.min_intensity, 
                 max_intensity=self.image_stats.max_intensity)
         
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
-            self.heuristic_function = Euclidean(scale=self.scale)
+            self.heuristic_function = EuclideanTransonic(scale=self.scale)
         
         self.is_canceled = False
         self.found_path = False
+        self.evaluated_nodes = 0
         self.result = []
 
     def _validate_inputs(
@@ -196,6 +197,7 @@ class AStarSearch:
             
             close_set_hash.add(current_coordinates)
 
+        self.evaluated_nodes = count
         return self.result
     
     def _default_value(self) -> float:
@@ -252,28 +254,25 @@ class AStarSearch:
         neighbors = []
         steps = [-1, 0, 1]
         for xdiff in steps:
+            new_x = node.point[1] + xdiff
+            if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                continue
+
             for ydiff in steps:
                 if xdiff == ydiff == 0:
                     continue
 
-                new_x = node.point[1] + xdiff
-                # new_x = node.point[0] + xdiff
-                if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                    continue
-                    
                 new_y = node.point[0] + ydiff
-                # new_y = node.point[1] + ydiff
                 if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
                     continue
 
-                # new_point = np.array([new_x, new_y])
                 new_point = np.array([new_y, new_x])
 
                 h_for_new_point = self._estimate_cost_to_goal(new_point)
 
                 intensity_at_new_point = self.image[new_y, new_x]
 
-                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
+                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
@@ -317,7 +316,15 @@ class AStarSearch:
         steps = [-1, 0, 1]
         
         for xdiff in steps:
+            new_x = node.point[2] + xdiff
+            if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                continue
+
             for ydiff in steps:
+                new_y = node.point[1] + ydiff
+                if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
+                    continue
+
                 for zdiff in steps:
                     if xdiff == ydiff == zdiff == 0:
                         continue
@@ -326,24 +333,12 @@ class AStarSearch:
                     if new_z < self.image_stats.z_min or new_z > self.image_stats.z_max:
                         continue
 
-                    # new_y = node.point[2] + ydiff
-                    new_y = node.point[1] + ydiff
-                    if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
-                        continue
-
-                    # new_x = node.point[1] + xdiff
-                    new_x = node.point[2] + xdiff
-                    if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                        continue
-
-                    #new_point = np.array([new_z, new_x, new_y])
                     new_point = np.array([new_z, new_y, new_x])
 
                     h_for_new_point = self._estimate_cost_to_goal(new_point)
 
-                    #intensity_at_new_point = self.image[new_z, new_x, new_y]
                     intensity_at_new_point = self.image[new_z, new_y, new_x]
-                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
+                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 

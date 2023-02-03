@@ -10,3 +10,4 @@ venv
 dist
 build
 rr30a_s0_ch2.tif
+__pythran__/

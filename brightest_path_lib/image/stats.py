@@ -35,8 +35,8 @@ class ImageStats:
         if len(image) == 0:
             raise ValueError
 
-        self.min_intensity = np.min(image)
-        self.max_intensity = np.max(image)
+        self.min_intensity = float(np.min(image))
+        self.max_intensity = float(np.max(image))
 
         self.x_min = 0
         self.y_min = 0

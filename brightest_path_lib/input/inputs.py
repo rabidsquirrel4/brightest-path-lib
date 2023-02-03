@@ -11,3 +11,4 @@ class HeuristicFunction(Enum):
 
 class SearchFunction(Enum):
     ASTAR = "astar"
+    NBASTAR = "nbastar"

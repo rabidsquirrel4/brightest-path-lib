@@ -37,6 +37,7 @@ class AStarThread(Thread):
         toc = time.perf_counter()
         print(f"Found brightest path in {toc - tic:0.4f} seconds")
         print(f"path size: {len(self.search_algorithm.result)}")
+        print(f"Number of nodes viewed: {self.search_algorithm.evaluated_nodes}")
         print("Done")
 
 
@@ -63,6 +64,7 @@ class NBAStarThread(Thread):
         toc = time.perf_counter()
         print(f"Found brightest path in {toc - tic:0.4f} seconds")
         print(f"path size: {len(self.search_algorithm.result)}")
+        print(f"Number of nodes viewed: {self.search_algorithm.evaluated_nodes}")
         print("Done")
 
 
@@ -87,20 +89,21 @@ def _plot_points(points: List[np.ndarray], color, size, alpha=1.0):
 
 
 def plot_brightest_path():
-    # image = data.cells3d()[30, 0]
-    # start_point = np.array([0,192]) # [y, x]
-    # goal_point = np.array([198,9])
+    image = data.cells3d()[30, 0]
+    start_point = np.array([0,192]) # [y, x]
+    goal_point = np.array([198,9])
 
-    image = tifffile.imread('a-star-image.tif')
-    start_point = np.array([188, 71]) # (y,x)
-    goal_point = np.array([126, 701])
+    # image = tifffile.imread('/Users/vasudhajha/Documents/mapmanager/brightest-path-lib/brightest_path_lib/a-star-image.tif')
+    # start_point = np.array([188, 71]) # (y,x)
+    # # goal_point = np.array([164, 197])
+    # goal_point = np.array([128, 628])
 
     _plot_image(image, start_point, goal_point)
 
     queue = Queue()
 
-    search_thread = AStarThread(image, start_point, goal_point, queue)
-    #search_thread = NBAStarThread(image, start_point, goal_point, queue)
+    # search_thread = AStarThread(image, start_point, goal_point, queue)
+    search_thread = NBAStarThread(image, start_point, goal_point, queue)
     search_thread.start()  # start the thread, internally Python calls tt.run()
 
     _updateInterval = 100  # wait for this number of results and update plot

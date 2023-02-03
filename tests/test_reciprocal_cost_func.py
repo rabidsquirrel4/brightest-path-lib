@@ -33,7 +33,7 @@ def test_init_when_min_intensity_greater_than_max():
 ])
 def test_cost_of_moving_to(min_intensity, max_intensity, intensity_at_new_point, expected_cost):
     reciprocal_cost_function = Reciprocal(min_intensity, max_intensity)
-    cost = reciprocal_cost_function.cost_of_moving_to(intensity_at_new_point)
+    cost = reciprocal_cost_function.cost_of_moving_to(float(intensity_at_new_point))
     assert round(cost, 3) == round(expected_cost, 3)
 
 def test_minimum_step_cost():

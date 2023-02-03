@@ -108,6 +108,7 @@ class NBAStarSearch:
         self.touch_node: BidirectionalNode = None
         self.is_canceled = False
         self.found_path = False
+        self.evaluated_nodes = 2 # since we will add the start and goal node to the open queue
         self.result = []
 
     def _validate_inputs(
@@ -264,6 +265,8 @@ class NBAStarSearch:
         in these directions
         - 2D coordinates are of the type (y, x)
         """
+        current_g_score = node.get_g(from_start) # optimization: will be the same for all neighbors
+
         steps = [-1, 0, 1]
         for xdiff in steps:
             new_x = node.point[1] + xdiff
@@ -280,10 +283,10 @@ class NBAStarSearch:
 
                 new_point = np.array([new_y, new_x])
 
-                current_g_score = node.get_g(from_start)
+                # current_g_score = node.get_g(from_start)
                 intensity_at_new_point = self.image[new_y, new_x]
 
-                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
+                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
@@ -316,6 +319,8 @@ class NBAStarSearch:
         or on the edges of the image)
         - 3D coordinates are of the form (z, x, y)
         """
+        current_g_score = node.get_g(from_start)
+
         steps = [-1, 0, 1]
         
         for xdiff in steps:
@@ -338,10 +343,10 @@ class NBAStarSearch:
 
                     new_point = np.array([new_z, new_y, new_x])
 
-                    current_g_score = node.get_g(from_start)
+                    # current_g_score = node.get_g(from_start)
                     intensity_at_new_point = self.image[new_z, new_y, new_x]
 
-                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
+                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
@@ -372,6 +377,7 @@ class NBAStarSearch:
             open_queue.put((tentative_f_score, self._get_node_priority(from_start), new_node))
             if self.open_nodes:
                 self.open_nodes.put(new_point_coordinates)
+            self.evaluated_nodes += 1
             self.node_at_coordinates[new_point_coordinates] = new_node
         # elif self._in_closed_set(new_point_coordinates, from_start):
         #     return
@@ -383,6 +389,7 @@ class NBAStarSearch:
             open_queue.put((tentative_f_score, self._get_node_priority(from_start), already_there))
             if self.open_nodes:
                 self.open_nodes.put(new_point_coordinates)
+            self.evaluated_nodes += 1
             path_length = already_there.g_score_from_start + already_there.g_score_from_goal
             if path_length < self.best_path_length:
                 self.best_path_length = path_length

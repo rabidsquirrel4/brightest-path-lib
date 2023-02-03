@@ -1,6 +1,9 @@
+from transonic import boost
+
 from brightest_path_lib.cost import Cost
 
-class Reciprocal(Cost):
+@boost
+class ReciprocalTransonic(Cost):
     """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving
     to a neighboring point
 
@@ -21,6 +24,13 @@ class Reciprocal(Cost):
         is between RECIPROCAL MIN and RECIPROCAL_MAX
 
     """
+
+    min_intensity: float
+    max_intensity: float
+    RECIPROCAL_MIN: float
+    RECIPROCAL_MAX: float
+    _min_step_cost: float
+
     def __init__(self, min_intensity: float, max_intensity: float) -> None:
         super().__init__()
         if min_intensity is None or max_intensity is None:
@@ -34,6 +44,7 @@ class Reciprocal(Cost):
         self._min_step_cost = 1.0 / self.RECIPROCAL_MAX
 
 
+    @boost
     def cost_of_moving_to(self, intensity_at_new_point: float) -> float:
         """calculates the cost of moving to a point
 
@@ -63,6 +74,7 @@ class Reciprocal(Cost):
         
         return 1.0 / intensity_at_new_point
     
+    @boost
     def minimum_step_cost(self) -> float:
         """calculates the minimum step cost
         
