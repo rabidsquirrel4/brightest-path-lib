@@ -1,7 +1,7 @@
 import numpy as np
 
 class BidirectionalNode:
-    """Class holding information about a node
+    """Class holding attributes and properties of a Bidirectional Node
 
     Parameters
     ----------
@@ -46,8 +46,8 @@ class BidirectionalNode:
         The predecessor's first ancestor is the start node
     predecessor_from_goal : BidirectionalNode
         the current node's immediate predecessor, from which we
-        travelled to the current node
-        The predecessor's first ancestor is the goal node
+        travelled to the current node The predecessor's first ancestor
+        is the goal node
     
     """
     def __init__(

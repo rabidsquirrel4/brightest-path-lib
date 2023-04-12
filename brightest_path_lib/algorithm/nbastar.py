@@ -11,7 +11,35 @@ from brightest_path_lib.node import Node, BidirectionalNode
 
 
 class NBAStarSearch:
-    """Class that implements the New Bidirectional A-Star Search Algorithm
+    """The New Bidirectional A* Search Algorithm is an improvement over the
+    original Bidirectional A* Search algorithm, which is a variation of the
+    A* Search algorithm that searches from both the start and goal nodes 
+    simultaneously in order to find the shortest path more efficiently.
+    
+    The New Bidirectional A* Search Algorithm was proposed to address a 
+    limitation of the original Bidirectional A* Search algorithm, which is 
+    that it often expands too many nodes and wastes computational resources. 
+    The new algorithm works by using two heuristic functions, one for the 
+    forward search and one for the backward search, and dynamically
+    adjusting them during the search.
+    
+    The algorithm starts with two search trees, one rooted at the start node
+    and one rooted at the goal node. The forward search tree expands nodes 
+    in the direction of the goal node, and the backward search tree expands 
+    nodes in the direction of the start node. The search terminates when the
+    two trees meet in the middle, i.e., when they have a common node. 
+    
+    During the search, the heuristic functions are dynamically adjusted
+    based on the cost of the path found so far. If the cost of the path
+    found so far is greater than the estimated cost of the path from the 
+    start node to the goal node, the heuristic function for the forward 
+    search is increased, and if the cost is less than the estimated cost, 
+    the heuristic function is decreased. The same adjustments are made 
+    to the heuristic function for the backward search.
+    
+    This dynamic adjustment of the heuristic functions helps to reduce the
+    number of nodes expanded during the search and improve the efficiency
+    of the algorithm.
 
     Parameters
     ----------
@@ -42,7 +70,7 @@ class NBAStarSearch:
     Attributes
     ----------
     image : numpy ndarray
-        the image where A star search is suppossed to run on
+        the image on which the brightest path search will be run
     start_point : numpy ndarray
         the coordinates of the start point
     goal_point : numpy ndarray
@@ -57,15 +85,47 @@ class NBAStarSearch:
         the heuristic function to be used to compute the estimated
         cost of moving from a point to the goal
         Default type is Euclidean
-    is_canceled : bool
-        should be set to True if the search needs to be stopped;
-        false by default
     open_nodes : Queue
         contains a list of points that are in the open set;
         can be used by the calling application to show a visualization
-        of where the algorithm is searching currently
+        of the algorithm's current search space
+    node_priority_from_start : int
+        a number given to a node whenever its added to the open set
+        from start to goal; this is so that if we have to choose between
+        two nodes with the same f_score, we choose the one which was added
+        earlier to the open set, i.e, the one with lower priority 
+    node_priority_from_goal : int
+        a number given to a node whenever its added to the open set
+        from start to goal; this is so that if we have to choose between
+        two nodes with the same f_score, we choose the one which was added
+        earlier to the open set, i.e, the one with lower priority
+    open_set_from_start : PriorityQueue
+        a priority queue containing tuples of the form:
+        (f_score, node_priority_from_start, node);
+        the node is what we will evaulate to find the brightest path from
+        start to goal point 
+    open_set_from_goal : PriorityQueue
+        a priority queue containing tuples of the form:
+        (f_score, node_priority_from_goal, node);
+        the node is what we will evaulate to find the brightest path from
+        goal to start point
+    node_at_coordinates : Dict
+        a mapping of a 2D/3D point to its corresponding node
+    best_path_length : int
+        this attribute is used to reject nodes that are too far; 
+        initially initialized to infinity when the distance from start to goal
+        or goal to start is unknown, it keeps shrinking to reflect the shortening
+        of distance between our terminal points
+    touch_node : BidirectionalNode
+        the common node that is encountered when going from start to goal
+        and goal to start
+    is_canceled : bool
+        should be set to True if the search needs to be stopped;
+        false by default
+    evaluated_nodes : int
+        the number of nodes that have been evaluated to yet in search of the brightest path
     result : List[numpy ndarray]
-        the result of the A star search containing the list of actual
+        the result of the NBA* search containing the list of actual
         points that constitute the brightest path from start_point to
         goal_point    
     """
@@ -89,9 +149,9 @@ class NBAStarSearch:
         self.goal_point = np.round(goal_point).astype(int)
         self.scale = scale
         self.open_nodes = open_nodes
-        self.node_priority_from_start, self.node_priority_from_goal = 0, 0
         self.open_set_from_start = PriorityQueue()
         self.open_set_from_goal = PriorityQueue()
+        self.node_priority_from_start, self.node_priority_from_goal = 0, 0
         self.node_at_coordinates: Dict[Tuple, BidirectionalNode] = {}
         # self.close_set_hash_from_start = set() # hashset contains tuple of node coordinates already been visited
         # self.close_set_hash_from_goal = set()
@@ -144,7 +204,7 @@ class NBAStarSearch:
         self._is_canceled = value
 
     def search(self) -> List[np.ndarray]:
-        """Function that performs A star search
+        """Performs bidirectional brightest path search
 
         Returns
         -------
@@ -153,8 +213,6 @@ class NBAStarSearch:
             that constitute the brightest path between the
             start_point and the goal_point
         
-        # Steps:
-
         """
         start_node = BidirectionalNode(point=self.start_point)
         goal_node = BidirectionalNode(point=self.goal_point)
@@ -293,7 +351,7 @@ class NBAStarSearch:
                 tentative_g_score = current_g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff)) * cost_of_moving_to_new_point
                 tentative_h_score = self._estimate_cost_to_goal(new_point, self.goal_point if from_start else self.start_point)
                 tentative_f_score = tentative_g_score + tentative_h_score
-                self.is_touch_node(new_point, tentative_g_score, tentative_f_score, node, from_start)
+                self._is_touch_node(new_point, tentative_g_score, tentative_f_score, node, from_start)
 
     def _expand_3D_neighbors_of(self, node: BidirectionalNode, from_start: bool):
         """Finds the neighbors of a 3D node
@@ -351,11 +409,13 @@ class NBAStarSearch:
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
                     tentative_g_score = current_g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff) + (zdiff*zdiff)) * cost_of_moving_to_new_point
-                    tentative_h_score = self._estimate_cost_to_goal(new_point, self.goal_point if from_start else self.start_point)
-                    tentative_f_score = tentative_g_score + tentative_h_score
-                    self.is_touch_node(new_point, tentative_g_score, tentative_f_score, node, from_start)
 
-    def is_touch_node(
+                    tentative_h_score = self._estimate_cost_to_goal(new_point, self.goal_point if from_start else self.start_point)
+
+                    tentative_f_score = tentative_g_score + tentative_h_score
+                    self._is_touch_node(new_point, tentative_g_score, tentative_f_score, node, from_start)
+
+    def _is_touch_node(
         self,
         new_point: np.ndarray,
         tentative_g_score: float,
@@ -363,6 +423,24 @@ class NBAStarSearch:
         predecessor: BidirectionalNode,
         from_start: bool
     ):
+        """Modifies various parameters based on whether a given point
+        has already been explored from one direction
+        
+        Parameters
+        ----------
+        new_point : numpy ndarray
+            the coordinates of point that is being examined for touch node
+        tentative_g_score : float
+            the tentative g_score of the new point
+        tentative_f_score: float
+            the tentative f_score of the new point
+        predecessor : BidirectionalNode
+            the node that is predecessor of the current point
+        from_start : bool
+            True/False value representing our direction of traversal,
+            True meaning we are traversing in from start to goal,
+            False meaning traversal from goal to start
+        """
         open_queue = self.open_set_from_start if from_start else self.open_set_from_goal
         
         new_point_coordinates = tuple(new_point)
@@ -396,9 +474,33 @@ class NBAStarSearch:
                 self.touch_node = already_there
     
     def _get_node_priority(self, from_start: bool) -> int:
+        """Helper function to get a node's priority
+
+        Parameters
+        ----------
+        from_start : bool
+            if True, we want the node priority from start
+            else, we want the node priority from goal
+        
+        Returns
+        -------
+        int
+            returns the node priority from start/goal 
+            based on the value of from start
+        """
         return self.node_priority_from_start if from_start else self.node_priority_from_goal
     
     def _increment_node_priority(self, from_start: bool):
+        """Helper function to increase the node priority
+        so that it can be assigned to the next node to be added
+        to the open set from start or open set from goal
+
+        Parameters
+        ----------
+        from_start : bool
+            if True, we increase the node priority from start
+            else, we increase the node priority from goal
+        """
         if from_start:
             self.node_priority_from_start += 1
         else:
@@ -430,14 +532,26 @@ class NBAStarSearch:
         )
     
     def _construct_path(self):
+        """constructs the brightest path upon reaching
+        the touch node in two steps:
+        1. Backtracks its steps from the touch node to the start node
+        to insert the coordinates of all the points forming the brightest path
+        in the result always at the 0th position
+        2. Moves from touchnode to goal node to append the coordinates of
+        all the points forming the brightest path
+        """
         current_node = self.touch_node
 
         while not np.array_equal(current_node.point, self.start_point):
             self.result.insert(0, current_node.point)
             current_node = current_node.predecessor_from_start
-             
-        current_node = self.touch_node
+        
+        self.result.insert(0, self.start_point)
+
+        current_node = self.touch_node.predecessor_from_goal
 
         while not np.array_equal(current_node.point, self.goal_point):
             self.result.append(current_node.point)
             current_node = current_node.predecessor_from_goal
+        
+        self.result.append(self.goal_point)
