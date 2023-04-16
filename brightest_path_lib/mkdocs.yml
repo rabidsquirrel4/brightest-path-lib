@@ -19,7 +19,7 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-  - Overview: overview.md
+  - Overview: index.md
   - Getting Started:
     - installation.md
     - quickstart_guide.md
@@ -27,4 +27,3 @@ nav:
     - user_manual.md
   - API Reference:
     - api_docs.md
-
