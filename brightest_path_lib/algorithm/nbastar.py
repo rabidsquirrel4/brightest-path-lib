@@ -78,6 +78,11 @@ class NBAStarSearch:
         the estimated cost of moving from a point to the goal
         Default type is HeuristicFunction.EUCLIDEAN to use the 
         euclidean function for cost estimation
+    open_nodes : Queue
+        contains a list of points that are in the open set;
+        can be used by the calling application to show a visualization
+        of the algorithm's current search space
+        Default value is None
 
     Attributes
     ----------

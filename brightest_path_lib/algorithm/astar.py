@@ -48,15 +48,15 @@ class AStarSearch:
     start_point : numpy ndarray
         the 2D/3D coordinates of the starting point (could be a pixel or a voxel)
         For 2D images, the coordinates are of the form (y, x)
-        For 2D images, the coordinates are of the form (z, x, y)
+        For 3D images, the coordinates are of the form (z, x, y)
     goal_point : numpy ndarray
         the 2D/3D coordinates of the goal point (could be a pixel or a voxel)
         For 2D images, the coordinates are of the form (y, x)
-        For 2D images, the coordinates are of the form (z, x, y)
+        For 3D images, the coordinates are of the form (z, x, y)
     scale : Tuple
         the scale of the image; defaults to (1.0, 1.0), i.e. image is not zoomed in/out
         For 2D images, the scale is of the form (x, y)
-        For 2D images, the scale is of the form (x, y, z)
+        For 3D images, the scale is of the form (x, y, z)
     cost_function : Enum CostFunction
         this enum value specifies the cost function to be used for computing 
         the cost of moving to a new point
@@ -66,11 +66,16 @@ class AStarSearch:
         the estimated cost of moving from a point to the goal
         Default type is HeuristicFunction.EUCLIDEAN to use the 
         euclidean function for cost estimation
+    open_nodes : Queue
+        contains a list of points that are in the open set;
+        can be used by the calling application to show a visualization
+        of where the algorithm is searching currently
+        Default value is None
 
     Attributes
     ----------
     image : numpy ndarray
-        the image where A star search is suppossed to run on
+        The 2D/3D image on which we will run an A star search
     start_point : numpy ndarray
         the coordinates of the start point
     goal_point : numpy ndarray
@@ -93,9 +98,9 @@ class AStarSearch:
         can be used by the calling application to show a visualization
         of where the algorithm is searching currently
     result : List[numpy ndarray]
-        the result of the A star search containing the list of actual
-        points that constitute the brightest path from start_point to
-        goal_point    
+        the result of the A star search containing the list of
+        points that constitute the brightest path between start and goal
+        points
     """
 
     def __init__(
@@ -166,7 +171,7 @@ class AStarSearch:
         self._is_canceled = value
 
     def search(self) -> List[np.ndarray]:
-        """Function that performs A star search
+        """Performs A star search to find the brightest path
 
         Returns
         -------
