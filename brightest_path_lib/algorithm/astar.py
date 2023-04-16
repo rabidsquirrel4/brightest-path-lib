@@ -1,17 +1,45 @@
+# algorithm/astar.py
+
+"""This implementation of the A* search algorithm finds the brightest path
+in a graph. Each node in the graph represents a point in space, and the
+weight of each edge represents the brightness of the path between the two nodes. 
+The goal is to find the path that maximizes the total brightness.
+     
+To use the A* search algorithm for brightest path finding, a heuristic 
+function is needed that estimates the maximum brightness that can be 
+achieved from the current node to the goal node. One way to do this 
+is to use a greedy heuristic that always selects the edge with the
+highest brightness from the current node. 
+
+The A* search algorithm starts at the start node and explores
+neighboring nodes, selecting the node with the highest brightness
+at each step. The algorithm uses the heuristic function to estimate
+the maximum brightness that can be achieved from the current node to
+the goal node. If the algorithm reaches the goal node, it terminates
+and returns the brightest path. If not, it continues searching until
+all nodes have been explored.
+
+To search for the brightest path between two points in an image:
+
+1. Initialize the AStarSearch class with the 2D/3D image,
+   start point and the goal point: `astar = AStarSearch(image, start_point, goal_point)`
+2. Call the search method: `path = astar.search()`
+"""
+
 from collections import defaultdict
 import math
 import numpy as np
 from queue import PriorityQueue, Queue
 from typing import List, Tuple
-from brightest_path_lib.cost import Reciprocal
-from brightest_path_lib.heuristic import Euclidean
+from brightest_path_lib.cost import ReciprocalTransonic
+from brightest_path_lib.heuristic import EuclideanTransonic
 from brightest_path_lib.image import ImageStats
 from brightest_path_lib.input import CostFunction, HeuristicFunction
 from brightest_path_lib.node import Node
 
 
 class AStarSearch:
-    """Class that implements the A-Star Search Algorithm
+    """A* Search Implementation
 
     Parameters
     ----------
@@ -91,15 +119,16 @@ class AStarSearch:
         self.open_nodes = open_nodes
 
         if cost_function == CostFunction.RECIPROCAL:
-            self.cost_function = Reciprocal(
+            self.cost_function = ReciprocalTransonic(
                 min_intensity=self.image_stats.min_intensity, 
                 max_intensity=self.image_stats.max_intensity)
         
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
-            self.heuristic_function = Euclidean(scale=self.scale)
+            self.heuristic_function = EuclideanTransonic(scale=self.scale)
         
         self.is_canceled = False
         self.found_path = False
+        self.evaluated_nodes = 0
         self.result = []
 
     def _validate_inputs(
@@ -108,7 +137,9 @@ class AStarSearch:
         start_point: np.ndarray,
         goal_point: np.ndarray,
     ):
-
+        """Checks for a non-empty image, start point and goal point before
+        the A* search
+        """
         if image is None or start_point is None or goal_point is None:
             raise TypeError
         if len(image) == 0 or len(start_point) == 0 or len(goal_point) == 0:
@@ -196,6 +227,7 @@ class AStarSearch:
             
             close_set_hash.add(current_coordinates)
 
+        self.evaluated_nodes = count
         return self.result
     
     def _default_value(self) -> float:
@@ -252,28 +284,25 @@ class AStarSearch:
         neighbors = []
         steps = [-1, 0, 1]
         for xdiff in steps:
+            new_x = node.point[1] + xdiff
+            if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                continue
+
             for ydiff in steps:
                 if xdiff == ydiff == 0:
                     continue
 
-                new_x = node.point[1] + xdiff
-                # new_x = node.point[0] + xdiff
-                if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                    continue
-                    
                 new_y = node.point[0] + ydiff
-                # new_y = node.point[1] + ydiff
                 if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
                     continue
 
-                # new_point = np.array([new_x, new_y])
                 new_point = np.array([new_y, new_x])
 
                 h_for_new_point = self._estimate_cost_to_goal(new_point)
 
                 intensity_at_new_point = self.image[new_y, new_x]
 
-                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
+                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
@@ -311,13 +340,21 @@ class AStarSearch:
         - Of course, we need to check for invalid cases where we can't have
         26 neighbors (when the current node is closer to,
         or on the edges of the image)
-        - 3D coordinates are of the form (z, x, y)
+        - 3D coordinates are of the form (z, y, x)
         """
         neighbors = []
         steps = [-1, 0, 1]
         
         for xdiff in steps:
+            new_x = node.point[2] + xdiff
+            if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
+                continue
+
             for ydiff in steps:
+                new_y = node.point[1] + ydiff
+                if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
+                    continue
+
                 for zdiff in steps:
                     if xdiff == ydiff == zdiff == 0:
                         continue
@@ -326,24 +363,12 @@ class AStarSearch:
                     if new_z < self.image_stats.z_min or new_z > self.image_stats.z_max:
                         continue
 
-                    # new_y = node.point[2] + ydiff
-                    new_y = node.point[1] + ydiff
-                    if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
-                        continue
-
-                    # new_x = node.point[1] + xdiff
-                    new_x = node.point[2] + xdiff
-                    if new_x < self.image_stats.x_min or new_x > self.image_stats.x_max:
-                        continue
-
-                    #new_point = np.array([new_z, new_x, new_y])
                     new_point = np.array([new_z, new_y, new_x])
 
                     h_for_new_point = self._estimate_cost_to_goal(new_point)
 
-                    #intensity_at_new_point = self.image[new_z, new_x, new_y]
                     intensity_at_new_point = self.image[new_z, new_y, new_x]
-                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(intensity_at_new_point)
+                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
@@ -376,8 +401,8 @@ class AStarSearch:
         return np.array_equal(point, self.goal_point)
 
     def _estimate_cost_to_goal(self, point: np.ndarray) -> float:
-        """Estimates the heuristic cost (h_score) between a point
-        and the goal
+        """Estimates the heuristic cost (h_score)
+        from a point to the goal point
 
         Parameters
         ----------
@@ -395,9 +420,9 @@ class AStarSearch:
         )
 
     def _construct_path_from(self, node: Node):
-        """stores the coodinates of nodes that constitute the brightest path 
-        from the goal_point to the start_point once the goal is reached.
-
+        """constructs the brightest path upon reaching the goal_point by 
+        backtracing steps from goal point to the start point
+        
         Parameters
         ----------
         node : Node

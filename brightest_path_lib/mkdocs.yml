@@ -1,0 +1,30 @@
+# mkdocs.yml
+site_name: Brightest Path Library
+
+theme:
+  name: "material"
+  features:
+    - content.code.copy
+
+plugins:
+  - mkdocstrings
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+nav:
+  - Overview: overview.md
+  - Getting Started:
+    - installation.md
+    - quickstart_guide.md
+  - User Guide:
+    - user_manual.md
+  - API Reference:
+    - api_docs.md
+

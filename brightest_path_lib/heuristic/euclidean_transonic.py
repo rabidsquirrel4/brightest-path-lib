@@ -2,8 +2,10 @@ from brightest_path_lib.heuristic import Heuristic
 import math
 import numpy as np
 from typing import Tuple
+from transonic import boost
 
-class Euclidean(Heuristic):
+@boost
+class EuclideanTransonic(Heuristic):
     """heuristic cost estimation using Euclidean distance from current point to goal point
 
     Parameters
@@ -23,6 +25,11 @@ class Euclidean(Heuristic):
         the scale of the image's Z-axis
 
     """
+
+    scale_x: float
+    scale_y: float
+    scale_z: float
+
     def __init__(self, scale: Tuple):
         if scale is None:
             raise TypeError
@@ -35,7 +42,9 @@ class Euclidean(Heuristic):
         if len(scale) == 3:
             self.scale_z = scale[2]
 
-    def estimate_cost_to_goal(self, current_point: np.ndarray, goal_point: np.ndarray) -> float:
+    @boost
+    def estimate_cost_to_goal(self, current_point: "int64[:]", goal_point: "int64[:]") -> float:
+        # def estimate_cost_to_goal(self, current_point: np.ndarray, goal_point: np.ndarray) -> float:
         """calculates the estimated cost from current point to the goal
     
         Parameters
@@ -67,6 +76,16 @@ class Euclidean(Heuristic):
         if (len(current_point) == 0 or len(goal_point) == 0) or (len(current_point) != len(goal_point)):
             raise ValueError
 
+        current_x: int
+        current_y: int
+        current_z: int
+        goal_x: int
+        goal_y: int
+        goal_z: int
+        x_diff: float
+        y_diff: float
+        z_diff: float
+        
         current_x, current_y, current_z = current_point[1], current_point[0], 0
         goal_x, goal_y, goal_z = goal_point[1], goal_point[0], 0
 
