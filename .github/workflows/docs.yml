@@ -12,9 +12,6 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v3
 
-      - name: Install Git LFS
-        run: sudo apt-get install git-lfs
-
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         # Or use mhausenblas/mkdocs-deploy-gh-pages@nomaterial to build without the mkdocs-material theme
