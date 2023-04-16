@@ -8,6 +8,7 @@ theme:
 
 plugins:
   - mkdocstrings
+  - mkdocs-jupyter
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -23,5 +24,8 @@ nav:
   - Getting Started:
     - installation.md
     - quickstart_guide.md
-  - User Guide: user_manual.md
   - API Documentation: api_docs.md
+  - Tutorials: 
+    - simple_notebook.ipynb
+    - threading_notebook.ipynb
+  
