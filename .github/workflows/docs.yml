@@ -18,5 +18,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG_FILE: brightest_path_lib/mkdocs.yml
-          EXTRA_PACKAGES: build-base
+          EXTRA_PACKAGES: build-base, git-lfs
           REQUIREMENTS: requirements.txt
