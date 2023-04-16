@@ -71,7 +71,21 @@ setup(
         ]),
     setup_requires=setup_requires,
     install_requires=["numpy", "transonic"],
-    extras_require={"test": ["pytest", "pytest-cov", "scikit-image", "pooch"]},
+    extras_require={
+        'dev': [
+            'mkdocs',
+            'mkdocs-material',
+            'mkdocs-jupyter',
+            'mkdocstrings',
+            'mkdocs-material-extensions'
+        ],
+        "test": [
+            "pytest", 
+            "pytest-cov", 
+            "scikit-image", 
+            "pooch"
+        ]
+    },
     python_requires=">=3.7",
     cmdclass={"build_ext": ParallelBuildExt},
     ext_modules=create_extensions(),

@@ -1,3 +1,31 @@
+# algorithm/astar.py
+
+"""This implementation of the A* search algorithm finds the brightest path
+in a graph. Each node in the graph represents a point in space, and the
+weight of each edge represents the brightness of the path between the two nodes. 
+The goal is to find the path that maximizes the total brightness.
+     
+To use the A* search algorithm for brightest path finding, a heuristic 
+function is needed that estimates the maximum brightness that can be 
+achieved from the current node to the goal node. One way to do this 
+is to use a greedy heuristic that always selects the edge with the
+highest brightness from the current node. 
+
+The A* search algorithm starts at the start node and explores
+neighboring nodes, selecting the node with the highest brightness
+at each step. The algorithm uses the heuristic function to estimate
+the maximum brightness that can be achieved from the current node to
+the goal node. If the algorithm reaches the goal node, it terminates
+and returns the brightest path. If not, it continues searching until
+all nodes have been explored.
+
+To search for the brightest path between two points in an image:
+
+1. Initialize the AStarSearch class with the 2D/3D image,
+   start point and the goal point: `astar = AStarSearch(image, start_point, goal_point)`
+2. Call the search method: `path = astar.search()`
+"""
+
 from collections import defaultdict
 import math
 import numpy as np
@@ -11,24 +39,7 @@ from brightest_path_lib.node import Node
 
 
 class AStarSearch:
-    """This implementation of the A* search algorithm finds the brightest path
-    in a graph. Each node in the graph represents a point in space, and the
-    weight of each edge represents the brightness of the path between the two nodes. 
-    The goal is to find the path that maximizes the total brightness.
-     
-    To use the A* search algorithm for brightest path finding, a heuristic 
-    function is needed that estimates the maximum brightness that can be 
-    achieved from the current node to the goal node. One way to do this 
-    is to use a greedy heuristic that always selects the edge with the
-    highest brightness from the current node. 
-    
-    The A* search algorithm starts at the start node and explores
-    neighboring nodes, selecting the node with the highest brightness
-    at each step. The algorithm uses the heuristic function to estimate
-    the maximum brightness that can be achieved from the current node to
-    the goal node. If the algorithm reaches the goal node, it terminates
-    and returns the brightest path. If not, it continues searching until
-    all nodes have been explored.
+    """A* Search Implementation
 
     Parameters
     ----------

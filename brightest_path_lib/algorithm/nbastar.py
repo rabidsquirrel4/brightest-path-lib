@@ -1,3 +1,43 @@
+# algorithm/nbastar.py
+
+"""The New Bidirectional A* Search Algorithm is an improvement over the
+original Bidirectional A* Search algorithm, which is a variation of the
+A* Search algorithm that searches from both the start and goal nodes 
+simultaneously in order to find the shortest path more efficiently.
+
+The New Bidirectional A* Search Algorithm was proposed to address a 
+limitation of the original Bidirectional A* Search algorithm, which is 
+that it often expands too many nodes and wastes computational resources. 
+The new algorithm works by using two heuristic functions, one for the 
+forward search and one for the backward search, and dynamically
+adjusting them during the search.
+
+The algorithm starts with two search trees, one rooted at the start node
+and one rooted at the goal node. The forward search tree expands nodes 
+in the direction of the goal node, and the backward search tree expands 
+nodes in the direction of the start node. The search terminates when the
+two trees meet in the middle, i.e., when they have a common node. 
+
+During the search, the heuristic functions are dynamically adjusted
+based on the cost of the path found so far. If the cost of the path
+found so far is greater than the estimated cost of the path from the 
+start node to the goal node, the heuristic function for the forward 
+search is increased, and if the cost is less than the estimated cost, 
+the heuristic function is decreased. The same adjustments are made 
+to the heuristic function for the backward search.
+
+This dynamic adjustment of the heuristic functions helps to reduce the
+number of nodes expanded during the search and improve the efficiency
+of the algorithm.
+
+To search for the brightest path between two points in an image:
+
+1. Initialize the NBAStarSearch class with the 2D/3D image,
+   start point and the goal point: `nbastar = NBAStarSearch(image, start_point, goal_point)`
+2. Call the search method: `path = nbastar.search()`
+"""
+
+
 from collections import defaultdict
 import math
 import numpy as np
@@ -11,35 +51,7 @@ from brightest_path_lib.node import Node, BidirectionalNode
 
 
 class NBAStarSearch:
-    """The New Bidirectional A* Search Algorithm is an improvement over the
-    original Bidirectional A* Search algorithm, which is a variation of the
-    A* Search algorithm that searches from both the start and goal nodes 
-    simultaneously in order to find the shortest path more efficiently.
-    
-    The New Bidirectional A* Search Algorithm was proposed to address a 
-    limitation of the original Bidirectional A* Search algorithm, which is 
-    that it often expands too many nodes and wastes computational resources. 
-    The new algorithm works by using two heuristic functions, one for the 
-    forward search and one for the backward search, and dynamically
-    adjusting them during the search.
-    
-    The algorithm starts with two search trees, one rooted at the start node
-    and one rooted at the goal node. The forward search tree expands nodes 
-    in the direction of the goal node, and the backward search tree expands 
-    nodes in the direction of the start node. The search terminates when the
-    two trees meet in the middle, i.e., when they have a common node. 
-    
-    During the search, the heuristic functions are dynamically adjusted
-    based on the cost of the path found so far. If the cost of the path
-    found so far is greater than the estimated cost of the path from the 
-    start node to the goal node, the heuristic function for the forward 
-    search is increased, and if the cost is less than the estimated cost, 
-    the heuristic function is decreased. The same adjustments are made 
-    to the heuristic function for the backward search.
-    
-    This dynamic adjustment of the heuristic functions helps to reduce the
-    number of nodes expanded during the search and improve the efficiency
-    of the algorithm.
+    """NBA* Implementation
 
     Parameters
     ----------
