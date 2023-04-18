@@ -10,14 +10,45 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  publish-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: "3.11"
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: setup.py
+    - name: Create wheel
+      run: |
+        pip wheel . --wheel-dir dist/
+    - name: Install dependencies
+      run: |
+        pip install setuptools wheel numpy transonic psutil twine build
+    - name: Publish
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
+      run: |
+        git tag
+        python -m build .
+        twine upload dist/*manylinux*.whl --verbose
+
+  publish-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
         cache: pip
         cache-dependency-path: setup.py
     - name: Install dependencies
@@ -30,4 +61,29 @@ jobs:
       run: |
         git tag
         python -m build .
-        twine upload dist/*
+        twine upload dist/* --verbose
+
+  publish-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: setup.py
+    - name: Install dependencies
+      run: |
+        pip install setuptools wheel numpy transonic psutil twine build
+    - name: Publish
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
+      run: |
+        git tag
+        python -m build .
+        twine upload dist/* --verbose

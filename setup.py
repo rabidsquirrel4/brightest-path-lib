@@ -7,7 +7,7 @@ from transonic.dist import ParallelBuildExt, make_backend_files, init_transonic_
 here = Path(__file__).parent.absolute()
 sys.path.insert(0, ".")
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 TRANSONIC_BACKEND = "pythran"
 
 build_dependencies_backends = {
