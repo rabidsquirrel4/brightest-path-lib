@@ -34,7 +34,7 @@ jobs:
       run: |
         pip install setuptools wheel numpy transonic psutil twine build
     - name: Build wheels
-      uses: pypa/cibuildwheel@v2
+      uses: pypa/cibuildwheel@v2.12.1
       env:
         CIBW_BUILD: ${{ matrix.python-version[1] }}-${{ matrix.platform }}
         CIBW_BUILD_FRONTEND: "build" # "pip"
