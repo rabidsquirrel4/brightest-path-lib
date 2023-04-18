@@ -25,6 +25,7 @@ jobs:
         cache-dependency-path: setup.py
     - name: Create wheel
       run: |
+        pip install auditwheel manylinux
         pip wheel . --wheel-dir dist/
     - name: Install dependencies
       run: |
@@ -37,6 +38,7 @@ jobs:
         git tag
         python -m build .
         twine upload dist/*manylinux*.whl --verbose
+      continue-on-error: true
 
   publish-windows:
     runs-on: windows-latest
@@ -62,6 +64,7 @@ jobs:
         git tag
         python -m build .
         twine upload dist/* --verbose
+      continue-on-error: true
 
   publish-macos:
     runs-on: macos-latest
@@ -87,3 +90,4 @@ jobs:
         git tag
         python -m build .
         twine upload dist/* --verbose
+      continue-on-error: true
