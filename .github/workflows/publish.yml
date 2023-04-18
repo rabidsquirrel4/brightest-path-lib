@@ -22,6 +22,7 @@ jobs:
         cache-dependency-path: setup.py
     - name: Install dependencies
       run: |
+        apt-get install -y libatlas-base-dev
         pip install setuptools wheel numpy transonic psutil twine build
     - name: Publish
       env:
