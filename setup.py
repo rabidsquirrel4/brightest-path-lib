@@ -7,7 +7,7 @@ from transonic.dist import ParallelBuildExt, make_backend_files, init_transonic_
 here = Path(__file__).parent.absolute()
 sys.path.insert(0, ".")
 
-VERSION = "1.0.8"
+VERSION = "1.0.9"
 TRANSONIC_BACKEND = "pythran"
 
 build_dependencies_backends = {
@@ -48,6 +48,12 @@ def create_extensions():
     transonize()
     return create_pythran_extensions()
 
+# packages = find_packages(include=[
+#         "brightest_path_lib",
+#         "brightest_path_lib.*",
+#         ])
+packages = find_packages(exclude=["tests"])
+print(f"found packages: {packages}")
 
 setup(
     name="brightest-path-lib",
@@ -63,12 +69,7 @@ setup(
     version=VERSION,
     #packages=["brightest_path_lib"],
     #packages=find_packages(),
-    packages=find_packages(include=[
-        "brightest_path_lib",
-        "brightest_path_lib.*",
-        "brightest_path_lib.algorithm",
-        "brightest_path_lib.input"
-        ]),
+    packages=packages,
     setup_requires=setup_requires,
     install_requires=["numpy", "transonic"],
     extras_require={
