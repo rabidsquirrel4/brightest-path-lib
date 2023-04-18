@@ -21,7 +21,7 @@ jobs:
         - ["3.9", "cp39"]
         - ["3.10", "cp310"]
         - ["3.11", "cp311"]
-        platform: ["manylinux_x86_64", "musllinux_x86_64"]
+        platform: ["manylinux_x86_64"]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version[0] }}
@@ -41,19 +41,13 @@ jobs:
       with:
         output-dir: "dist"
         config-file: "pyproject.toml"
-    # - name: Create wheels
-    #   uses: RalfG/python-wheels-manylinux-build@v0.7.1-manylinux2010_x86_64
-    #   with:
-    #     build-requirements: 'setuptools wheel numpy transonic psutil'
     - name: Publish
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
       run: |
         git tag
-        python -m build .
         twine upload dist/*manylinux*.whl --verbose
-        twine upload dist/*musllinux*.whl --verbose
       continue-on-error: true
 
   publish-windows:
