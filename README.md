@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/github/mapmanager/brightest-path-lib/branch/main/graph/badge.svg?token=0ZR226588I)](https://codecov.io/github/mapmanager/brightest-path-lib)
 [![OS](https://img.shields.io/badge/OS-Linux|Windows|macOS-blue.svg)]()
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](https://github.com/mapmanager/brightest-path-lib/blob/main/LICENSE)
-<!-- [![PyPI](https://img.shields.io/pypi/v/brightest-path-lib.svg)](https://pypi.org/project/brightest-path-lib/) -->
+[![PyPI](https://img.shields.io/pypi/v/brightest-path-lib.svg)](https://pypi.org/project/brightest-path-lib/)
 <!-- [![Changelog](https://img.shields.io/github/v/release/mapmanager/brightest-path-lib?include_prereleases&label=changelog)](https://github.com/mapmanager/brightest-path-lib/releases) -->
 
 A library of path-finding algorithms to find the brightest path between two points.
