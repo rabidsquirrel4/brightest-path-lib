@@ -1,6 +1,3 @@
-import sys
-sys.path.append("/Users/vasudhajha/Documents/mapmanager/brightest-path-lib")
-
 from queue import Empty, Queue
 from threading import Thread
 import tifffile
@@ -95,22 +92,22 @@ def plot_brightest_path():
 
     image = tifffile.imread('/Users/vasudhajha/Documents/mapmanager/brightest-path-lib/brightest_path_lib/a-star-image.tif')
     start_point = np.array([188, 71]) # (y,x)
-    goal_point = np.array([164, 197])
+    goal_point = np.array([116, 415])
     #goal_point = np.array([128, 628])
 
     _plot_image(image, start_point, goal_point)
 
     queue = Queue()
 
-    search_thread = AStarThread(image, start_point, goal_point, queue)
-    #search_thread = NBAStarThread(image, start_point, goal_point, queue)
+    # search_thread = AStarThread(image, start_point, goal_point, queue)
+    search_thread = NBAStarThread(image, start_point, goal_point, queue)
     search_thread.start()  # start the thread, internally Python calls tt.run()
 
     _updateInterval = 100  # wait for this number of results and update plot
     plotItems = []
     while search_thread.is_alive() or not queue.empty(): # polling the queue
-        if search_thread.search_algorithm.found_path:
-            break
+        # if search_thread.search_algorithm.found_path:
+        #     break
 
         try:
             item = queue.get(False)
