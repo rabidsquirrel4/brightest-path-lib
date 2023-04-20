@@ -48,16 +48,12 @@ def create_extensions():
     transonize()
     return create_pythran_extensions()
 
-# packages = find_packages(include=[
-#         "brightest_path_lib",
-#         "brightest_path_lib.*",
-#         ])
 packages = find_packages(exclude=["tests"])
 print(f"found packages: {packages}")
 
 setup(
     name="brightest-path-lib",
-    description="A library of path-finding algorithms to find the brightest path between two points.",
+    description="A library of path-finding algorithms to find the brightest path between two points in an image.",
     author="Vasudha Jha",
     url="https://github.com/mapmanager/brightest-path-lib",
     project_urls={

@@ -18,6 +18,8 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - attr_list
+  - md_in_html
 
 nav:
   - Overview: index.md
@@ -28,4 +30,4 @@ nav:
   - Tutorials: 
     - simple_notebook.ipynb
     - threading_notebook.ipynb
-  
+ 

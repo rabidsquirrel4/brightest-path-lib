@@ -1,6 +1,3 @@
-import sys
-sys.path.append("/Users/vasudhajha/Documents/mapmanager/brightest-path-lib")
-
 from brightest_path_lib.algorithm import AStarSearch, NBAStarSearch
 import numpy as np
 import napari
