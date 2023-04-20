@@ -8,9 +8,9 @@
 [![PyPI](https://img.shields.io/pypi/v/brightest-path-lib.svg)](https://pypi.org/project/brightest-path-lib/)
 <!-- [![Changelog](https://img.shields.io/github/v/release/mapmanager/brightest-path-lib?include_prereleases&label=changelog)](https://github.com/mapmanager/brightest-path-lib/releases) -->
 
-A library of path-finding algorithms to find the brightest path between two points.
+A library of path-finding algorithms to find the brightest path between two points in an image.
 
-## Installation
+<!-- ## Installation
 
 Install this library using `pip`:
 
@@ -34,4 +34,13 @@ Now install the dependencies and test dependencies:
 
 To run the tests:
 
-    pytest
+    pytest -->
+
+## Setting Up
+
+To get started with using this library, please visit our [website](https://mapmanager.net/brightest-path-lib/installation/) for instructions on how to install and use the library.
+
+## Usage
+For more detailed instructions on how to use this library, please see the [documentation](https://mapmanager.net/brightest-path-lib/api_docs/) page.
+
+

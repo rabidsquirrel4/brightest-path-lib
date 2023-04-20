@@ -11,10 +11,10 @@ The `brightest-path-lib` is a Python library which allows users to efficiently f
   <figcaption>Finding Brightest Path using NBA* Search</figcaption>
 </figure> -->
 
-![Finding Brightest Path using A* Search](assets/images/astar.gif)
+![Finding Brightest Path using A* Search](./assets/images/astar.gif)
 Finding Brightest Path using A* Search
 
-![Finding Brightest Path using NBA* Search](assets/images/nbastar.gif)
+![Finding Brightest Path using NBA* Search](./assets/images/nbastar.gif)
 Finding Brightest Path using NBA* Search
 
 ## Capabilities
