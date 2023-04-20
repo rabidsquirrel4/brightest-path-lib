@@ -8,12 +8,14 @@ To use the library, you'll need to have atleast Python 3.7 installed on your sys
 pip install --upgrade brightest-path-lib
 ```
 
+or
+
 ## 2. Install from source
 
 ```sh
 git clone https://github.com/mapmanager/brightest-path-lib.git
 cd brightest-path-lib
-pip install .
+pip install -e .
 ```
 
 ## Verify installation
