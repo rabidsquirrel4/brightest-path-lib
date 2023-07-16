@@ -2,13 +2,6 @@
 
 The `brightest-path-lib` is a Python library which allows users to efficiently find the path with the maximum brightness in a 2D or 3D images. It uses the A\* Search and NBA\* Search algorithms, which are informed search algorithms that use heuristics to guide the search towards the most promising areas of the image.
 
-## Examples
-
-Here is an example of tracing the brightest path along a neuronal dendrite in an image acquired with awake in vivo two-photon microscopy.
-
-<IMG SRC="xxx" width=600>
-
-
 ## Capabilities
 
 - The library provides easy-to-use functions that take the image data and start and end points as input and return the path with the maximum brightness as output.
