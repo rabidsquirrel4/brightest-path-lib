@@ -8,39 +8,38 @@
 [![PyPI](https://img.shields.io/pypi/v/brightest-path-lib.svg)](https://pypi.org/project/brightest-path-lib/)
 <!-- [![Changelog](https://img.shields.io/github/v/release/mapmanager/brightest-path-lib?include_prereleases&label=changelog)](https://github.com/mapmanager/brightest-path-lib/releases) -->
 
-A library of path-finding algorithms to find the brightest path between two points in an image.
+A Python package of path-finding algorithms to find the brightest path between points in an image.
 
-<!-- ## Installation
+## Getting Started
 
-Install this library using `pip`:
+To install and get started with the `brightest-path-lib`, please visit the [documentation website](https://mapmanager.net/brightest-path-lib/installation/).
 
-    pip install brightest-path-lib
+For more detailed instructions on how to use the `brightest-path-lib`, please see the [API documentation](https://mapmanager.net/brightest-path-lib/api_docs/).
 
-## Usage
+## Contributing
 
-Usage instructions go here.
+Contributions are very welcome. Tests can be run with `pytest`, please ensure the coverage at least stays the same before you submit a pull request.
 
-## Development
-
-To contribute to this library, first checkout the code. Then create a new virtual environment:
+To contribute to this package, first checkout the code. Then create a new virtual environment:
 
     cd brightest-path-lib
-    python -m venv venv
-    source venv/bin/activate
+    python -m venv brightest-venv
+    source brightest-venv/bin/activate
 
-Now install the dependencies and test dependencies:
+Now install the package with the testing dependencies:
 
     pip install -e '.[test]'
 
 To run the tests:
 
-    pytest -->
+    pytest
 
-## Setting Up
+## Issues
 
-To get started with using this library, please visit our [website](https://mapmanager.net/brightest-path-lib/installation/) for instructions on how to install and use the library.
+If you have any suggestions or encounter any problems, please file an [issue](https://github.com/mapmanager/brightest-path-lib/issues) along with a detailed description.
 
-## Usage
-For more detailed instructions on how to use this library, please see the [documentation](https://mapmanager.net/brightest-path-lib/api_docs/) page.
+## License
+
+Distributed under the terms of the GNU GPL v3.0 license, "brightest-path-lib" is free and open source software.
 
 

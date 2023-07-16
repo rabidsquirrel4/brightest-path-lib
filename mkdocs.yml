@@ -5,6 +5,7 @@ theme:
   name: "material"
   features:
     - content.code.copy
+    - navigation.instant
 
 plugins:
   - mkdocstrings
@@ -22,7 +23,7 @@ markdown_extensions:
   - md_in_html
 
 nav:
-  - Overview: index.md
+  - Overview: overview.md
   - Getting Started:
     - installation.md
     - quickstart_guide.md
@@ -30,4 +31,5 @@ nav:
   - Tutorials: 
     - simple_notebook.ipynb
     - threading_notebook.ipynb
+  - About: about.md
  
