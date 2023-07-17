@@ -37,4 +37,5 @@ nav:
   - Tutorials: 
     - simple_notebook.ipynb
     - threading_notebook.ipynb
+  - About: about.md
  
