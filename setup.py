@@ -51,9 +51,16 @@ def create_extensions():
 packages = find_packages(exclude=["tests"])
 print(f"found packages: {packages}")
 
+# load the readme
+_thisPath = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.abspath(_thisPath+"/README.md")) as f:
+    long_description = f.read()
+
 setup(
     name="brightest-path-lib",
-    description="A library of path-finding algorithms to find the brightest path between two points in an image.",
+    description="A library of path-finding algorithms to find the brightest path between points in an image.",
+    long_description=long_description,
+    long_description_content_type = 'text/markdown',
     author="Vasudha Jha",
     url="https://github.com/mapmanager/brightest-path-lib",
     project_urls={
