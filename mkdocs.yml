@@ -1,5 +1,11 @@
 # mkdocs.yml
 site_name: Brightest Path Library
+site_description: A library of path-finding algorithms to find the brightest path between two points.
+site_author: Robert H Cudmore
+
+repo_name: brightest-path-lib
+repo_url: https://github.com/mapmanager/brightest-path-lib
+edit_uri: ""
 
 theme:
   name: "material"
@@ -23,7 +29,7 @@ markdown_extensions:
   - md_in_html
 
 nav:
-  - Overview: overview.md
+  - Introduction: index.md
   - Getting Started:
     - installation.md
     - quickstart_guide.md

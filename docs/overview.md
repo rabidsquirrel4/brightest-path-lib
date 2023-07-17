@@ -1,38 +1,3 @@
-<style>
-#videotable {
-    /*float: right;*/
-    border: 0px solid #ddd;
-    padding: 5px;
-    /* font-family: "Trebuchet MS", Arial, Helvetica, sans-serif; */
-    /* border-collapse: collapse; */
-    /* width: 100%; */
-}
-
-#videotable td, #videotable th {
-    border: 0px solid #ddd;
-    text-align: left;
-    valign: top
-    padding: 5px;
-    /* padding: 8px; */
-}
-
-#videotable tr:nth-child(even){
-	/* background-color: #f2f2f2; */
-}
-
-/* #videotable tr:hover {background-color: #ddd;} */
-
-#videotable th {
-    /* padding-top: 12px; */
-    /* padding-bottom: 12px; */
-    text-align: left;
-    background-color: #4CAF50;
-    color: white;
-}
-</style>
-
-# Overview
-
 The `brightest-path-lib` is a Python library which allows users to efficiently find the path with the maximum brightness in a 2D or 3D images. It uses the A\* Search and NBA\* Search algorithms, which are informed search algorithms that use heuristics to guide the search towards the most promising areas of the image.
 
 <!-- <figure markdown>
