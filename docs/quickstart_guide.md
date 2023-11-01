@@ -82,6 +82,7 @@ plt.plot(goal[1], goal[0], 'or')
 yPlot = [point[0] for point in path]
 xPlot = [point[1] for point in path]
 plt.scatter(xPlot, yPlot, c='y', s=4, alpha=0.5)
+plt.show()
 ```
 
 That's it! With these simple steps, you can quickly get started using `brightest-path-lib` to find the brightest path between two points in your image.

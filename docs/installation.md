@@ -1,6 +1,6 @@
 # Installation
 
-To use the library, you'll need to have at least Python 3.7 installed on your system. Once you've verified that you have Python installed, you can follow these steps to install the library:
+To use the library, you'll need to have at least Python 3.7 installed on your computer. Once you've verified that you have Python installed, you can follow these steps to install the library:
 
 ## 1. Install the library using pip
 
@@ -11,6 +11,8 @@ pip install --upgrade brightest-path-lib
 or
 
 ## 2. Install from source
+
+This is assuming you have `git` installed!
 
 ```sh
 git clone https://github.com/mapmanager/brightest-path-lib.git
@@ -24,4 +26,10 @@ Once you've installed the library, you can import it into your Python code using
 
 ```python
 import brightest_path_lib
+```
+
+And then check the version:
+
+```python
+brightest_path_lib.__version__
 ```

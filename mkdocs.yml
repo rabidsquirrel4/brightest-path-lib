@@ -30,12 +30,10 @@ markdown_extensions:
 
 nav:
   - Introduction: index.md
-  - Getting Started:
-    - installation.md
-    - quickstart_guide.md
-  - API Documentation: api_docs.md
-  - Tutorials: 
+  - Installation: installation.md
+  - Getting Started: 
     - simple_notebook.ipynb
     - threading_notebook.ipynb
+  - API Documentation: api_docs.md
   - About: about.md
  
