@@ -63,8 +63,7 @@ print("Starting AStar ...")
 path = astar.search()
 astar_end_time = time.time()
 print("AStar ended.")
-print(f"Astar Run Time: " + 
-        f"{astar_end_time - astar_start_time} seconds")
+print(f"Astar Run Time: {astar_end_time - astar_start_time} seconds")
 
 plt.imshow(img_rgba)
 plt.plot(start_pixel[1], start_pixel[0], 'og')
