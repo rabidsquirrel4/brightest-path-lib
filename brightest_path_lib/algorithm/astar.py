@@ -31,7 +31,7 @@ import math
 import numpy as np
 from queue import PriorityQueue, Queue
 from typing import List, Tuple
-from brightest_path_lib.cost import ReciprocalTransonic
+from brightest_path_lib.cost import Reciprocal
 from brightest_path_lib.heuristic import EuclideanTransonic
 from brightest_path_lib.image import ImageStats
 from brightest_path_lib.input import CostFunction, HeuristicFunction
@@ -105,7 +105,8 @@ class AStarSearch:
 
     def __init__(
         self,
-        image: np.ndarray,
+        int_image: np.ndarray,
+        rgba_image: np.ndarray,
         start_point: np.ndarray,
         goal_point: np.ndarray,
         scale: Tuple = (1.0, 1.0),
@@ -114,17 +115,18 @@ class AStarSearch:
         open_nodes: Queue = None
     ):
 
-        self._validate_inputs(image, start_point, goal_point)
+        self._validate_inputs(int_image, start_point, goal_point)
 
-        self.image = image
-        self.image_stats = ImageStats(image)
+        self.int_image = int_image
+        self.rgba_image = rgba_image
+        self.image_stats = ImageStats(int_image)
         self.start_point = np.round(start_point).astype(int)
         self.goal_point = np.round(goal_point).astype(int)
         self.scale = scale
         self.open_nodes = open_nodes
 
         if cost_function == CostFunction.RECIPROCAL:
-            self.cost_function = ReciprocalTransonic(
+            self.cost_function = Reciprocal(
                 min_intensity=self.image_stats.min_intensity, 
                 max_intensity=self.image_stats.max_intensity)
         
@@ -305,9 +307,13 @@ class AStarSearch:
 
                 h_for_new_point = self._estimate_cost_to_goal(new_point)
 
-                intensity_at_new_point = self.image[new_y, new_x]
+                intensity_at_new_point = float(self.int_image[new_y, new_x])
+                rgba_at_new_point = self.rgba_image[new_y, new_x]
 
-                cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
+                cost_of_moving_to_new_point = (self.cost_function
+                                               .cost_of_moving_to(
+                                                   intensity_at_new_point,
+                                                   rgba_at_new_point))
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
@@ -372,8 +378,12 @@ class AStarSearch:
 
                     h_for_new_point = self._estimate_cost_to_goal(new_point)
 
-                    intensity_at_new_point = self.image[new_z, new_y, new_x]
-                    cost_of_moving_to_new_point = self.cost_function.cost_of_moving_to(float(intensity_at_new_point))
+                    intensity_at_new_point = float(self.int_image[new_z, new_y, new_x])
+                    rgba_at_new_point = self.rgba_image[new_z, new_y, new_x]
+                    cost_of_moving_to_new_point = (self.cost_function
+                                                   .cost_of_moving_to(
+                                                       intensity_at_new_point,
+                                                       rgba_at_new_point))
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 

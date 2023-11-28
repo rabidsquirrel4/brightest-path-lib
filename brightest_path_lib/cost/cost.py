@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 class Cost(ABC):
     """Base class for cost function
     """
 
     @abstractmethod
-    def cost_of_moving_to(self, intensity_at_new_point: float) -> float:
+    def cost_of_moving_to(self, intensity_at_new_point: float, 
+                          rgba_at_new_point: np.ndarray) -> float:
         """calculates the cost of moving to a point
 
         Parameters

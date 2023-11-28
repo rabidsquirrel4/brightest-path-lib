@@ -1,7 +1,7 @@
 from brightest_path_lib.cost import Cost
 import numpy as np
 
-class Reciprocal(Cost):
+class ReciprocalConsistency(Cost):
     """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving
     to a neighboring point
 

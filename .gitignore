@@ -12,3 +12,5 @@ build
 rr30a_s0_ch2.tif
 __pythran__/
 .coverage
+brightest-venv/
+images/
