@@ -2,7 +2,7 @@ from brightest_path_lib.cost import Cost
 import numpy as np
 import math
 
-class ReciprocalConsistency(Cost):
+class ConsistencyTurns(Cost):
     """Uses the reciprocal of pixel/voxel intensity to compute the cost of moving
     to a neighboring point
 
@@ -44,7 +44,8 @@ class ReciprocalConsistency(Cost):
         self.target_rgb = target_rgb
         self.RECIPROCAL_MIN = float(1E-6)
         self.RECIPROCAL_MAX = 255.0
-        self.THRESHOLD = 0.1
+        self.THRESHOLD = 0.5
+        self.MIN_RGB_DIST = 0.1
         self._min_step_cost = 1.0 / self.RECIPROCAL_MAX
 
     @staticmethod
@@ -53,7 +54,16 @@ class ReciprocalConsistency(Cost):
         g_dist = rgb_arr1[1] - rgb_arr2[1]
         b_dist = rgb_arr1[2] - rgb_arr2[2]
         return math.sqrt(r_dist*r_dist + g_dist*g_dist + b_dist*b_dist)
+    
+    # TODO:
+    def _direction_cost():
+        pass
+    
+    # TODO:
+    def _intensity_cost():
+        pass
 
+    # TODO: x, y, intensity, theta(pervious direction moved)
     def cost_of_moving_to(self, intensity_at_new_point: float, 
                           rgba_at_new_point: np.ndarray, 
                           movement_distance: float) -> float:
@@ -81,18 +91,21 @@ class ReciprocalConsistency(Cost):
 
         intensity_at_new_point = self.RECIPROCAL_MAX * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
 
-        #
         if intensity_at_new_point > self.THRESHOLD * self.RECIPROCAL_MAX:
-            rgb_dist = 255.0 * self._rgb_distance(self.target_rgb, rgba_at_new_point)
-            if rgb_dist > self.RECIPROCAL_MIN:
-                return rgb_dist
-            else:
-                return self.RECIPROCAL_MIN
-        else:    
-            if intensity_at_new_point < self.RECIPROCAL_MIN:
-                intensity_at_new_point = self.RECIPROCAL_MIN
-            
-            return 1.0 / intensity_at_new_point
+            rgb_dist = self._rgb_distance(self.target_rgb, rgba_at_new_point)
+            if rgb_dist < self.MIN_RGB_DIST:
+                # TODO: NEED TO WORK ON - probably
+                if movement_distance > 1:
+                    return 255.0 * movement_distance
+                    rgb_dist = 255.0 * self._rgb_distance(self.target_rgb, rgba_at_new_point)
+                    return math.max(rgb_dist, self.RECIPROCAL_MIN)
+                else:
+                    return self.minimum_step_cost()
+            return 255.0 * rgb_dist
+        
+        if intensity_at_new_point < self.RECIPROCAL_MIN:
+            intensity_at_new_point = self.RECIPROCAL_MIN
+        return 1.0 / intensity_at_new_point
     
     def minimum_step_cost(self) -> float:
         """calculates the minimum step cost

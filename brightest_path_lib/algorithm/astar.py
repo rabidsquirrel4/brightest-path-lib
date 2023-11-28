@@ -129,10 +129,14 @@ class AStarSearch:
             self.cost_function = Reciprocal(
                 min_intensity=self.image_stats.min_intensity, 
                 max_intensity=self.image_stats.max_intensity)
+        else:
+            self.cost_function = cost_function
         
         if heuristic_function == HeuristicFunction.EUCLIDEAN:
             self.heuristic_function = EuclideanTransonic(scale=self.scale)
-        
+        else: 
+            self.heuristic_function = heuristic_function
+
         self.is_canceled = False
         self.found_path = False
         self.evaluated_nodes = 0
@@ -309,17 +313,26 @@ class AStarSearch:
 
                 intensity_at_new_point = float(self.int_image[new_y, new_x])
                 rgba_at_new_point = self.rgba_image[new_y, new_x]
+                
 
+                distance_to_new_pt = math.sqrt(xdiff*xdiff + ydiff*ydiff)
                 cost_of_moving_to_new_point = (self.cost_function
                                                .cost_of_moving_to(
-                                                   intensity_at_new_point,
-                                                   rgba_at_new_point))
+                                                    # curr_x and curr_y
+                                                    # new_x and new_y
+                                                    intensity_at_new_point,
+                                                    # pass in intensity_at_old_point    
+                                                    rgba_at_new_point,
+                                                    # rgba_at_old_point
+                                                    # curr_theta
+                                                   distance_to_new_pt))
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
                 g_for_new_point = node.g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff)) * cost_of_moving_to_new_point
                 neighbor = Node(
                     point=new_point,
+                    # direction,
                     g_score=g_for_new_point,
                     h_score=h_for_new_point,
                     predecessor=node
@@ -380,10 +393,12 @@ class AStarSearch:
 
                     intensity_at_new_point = float(self.int_image[new_z, new_y, new_x])
                     rgba_at_new_point = self.rgba_image[new_z, new_y, new_x]
+                    distance_to_new_pt = math.sqrt(xdiff*xdiff + ydiff*ydiff + zdiff*zidff)
                     cost_of_moving_to_new_point = (self.cost_function
                                                    .cost_of_moving_to(
                                                        intensity_at_new_point,
-                                                       rgba_at_new_point))
+                                                       rgba_at_new_point,
+                                                       distance_to_new_pt))
                     if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                         cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 

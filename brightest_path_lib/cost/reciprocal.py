@@ -36,7 +36,8 @@ class Reciprocal(Cost):
 
 
     def cost_of_moving_to(self, intensity_at_new_point: float, 
-                          rgba_at_new_point: np.ndarray) -> float:
+                          rgba_at_new_point: np.ndarray, 
+                          movement_distance: float) -> float:
         """calculates the cost of moving to a point
 
         Parameters
