@@ -49,13 +49,14 @@ start_end_dict = {"pair1": [(2270, 4246), (5117, 4600)],
                   "pair5": [(5100, 941), (3021, 1216)],
                   }
 
-pair = "pair5"
+pair = "pair3"
 start_pixel, end_pixel = start_end_dict[pair][0], start_end_dict[pair][1]
 
-cost_func = "ct"
+cost_func = "ct-weighted-sum"
+parameters = "direction-wght=10000000"
 # TODO: change to reflect new astar search changes
 consistency_cost_func: CostFunction = ReciprocalConsistency(0, 1, img_rgba[start_pixel])
-if cost_func == "ct":
+if cost_func[:2] == "ct":
     consistency_cost_func: CostFunction = ConsistencyTurns(0, 1, img_rgba[start_pixel])
 # sand_trap_heuristic_func: HeuristicFunction = 
 # astar = AStarSearch(img, start_pixel, end_pixel, 
@@ -78,7 +79,7 @@ plt.plot([point[1] for point in astar.result], [point[0] for point in path], '-b
 plt.plot(start_pixel[1], start_pixel[0], 'og')
 plt.plot(end_pixel[1], end_pixel[0], 'or')
 plt.tight_layout()
-plt.savefig(f"images/substation3_200_{pair}_{cost_func}.png")
+plt.savefig(f"images/substation3_200_{pair}_{cost_func}_{parameters}.png")
 # plt.show()
 plt.close()
 

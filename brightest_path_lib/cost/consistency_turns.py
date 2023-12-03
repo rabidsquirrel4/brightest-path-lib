@@ -49,7 +49,7 @@ class ConsistencyTurns(Cost):
         self.INT_THRESHOLD = 0.5
         self.RGB_DIST_THRESHOLD = 0.1
         self.RGB_WEIGHT = 255.0
-        self.DIRECTION_WEIGHT = 255.0
+        self.DIRECTION_WEIGHT = 10000000.
         self._min_step_cost = 1.0 / self.RECIPROCAL_MAX
 
     @staticmethod
@@ -99,23 +99,19 @@ class ConsistencyTurns(Cost):
         if intensity_at_new_point > self.max_intensity:
             raise ValueError
 
-        # if intensity great enough, we should check the consistency of rgb values
-        if intensity_at_new_point > self.INT_THRESHOLD:
-            rgb_dist = self._rgb_distance(rgba_at_curr_point, rgba_at_new_point)
-            # if the rgb values are pretty consistent, then use block distance
-            # to determine the next best pixel to move to
-            if rgb_dist < self.RGB_DIST_THRESHOLD:
-                # TODO: need to update 
-                return max(self.DIRECTION_WEIGHT * block_distance, 
-                              self.minimum_step_cost())
-            rgb_dist = self.RGB_WEIGHT * rgb_dist
-            return max(rgb_dist, self.RECIPROCAL_MIN)
+        rgb_cost = self._rgb_distance(rgba_at_curr_point, rgba_at_new_point)
+        
+        dir_cost = block_distance
         
         intensity_at_new_point = self.RECIPROCAL_MAX * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
         if intensity_at_new_point < self.RECIPROCAL_MIN:
             intensity_at_new_point = self.RECIPROCAL_MIN
-        return 1.0 / intensity_at_new_point
-    
+        int_cost = 1.0 / intensity_at_new_point
+        
+        weighted_sum_cost = (self.RGB_WEIGHT * rgb_cost + 
+                             self.DIRECTION_WEIGHT * dir_cost + int_cost) 
+        return max(weighted_sum_cost, self.minimum_step_cost())
+
     def minimum_step_cost(self) -> float:
         """calculates the minimum step cost
         
