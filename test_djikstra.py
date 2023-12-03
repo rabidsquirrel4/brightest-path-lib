@@ -52,7 +52,7 @@ start_end_dict = {"pair1": [(2270, 4246), (5117, 4600)],
 pair = "pair3"
 start_pixel, end_pixel = start_end_dict[pair][0], start_end_dict[pair][1]
 
-cost_func = "ct-weighted-sum"
+cost_func = "ct-wght-sum_rgb-thresh"
 parameters = "direction-wght=10000000"
 # TODO: change to reflect new astar search changes
 consistency_cost_func: CostFunction = ReciprocalConsistency(0, 1, img_rgba[start_pixel])
