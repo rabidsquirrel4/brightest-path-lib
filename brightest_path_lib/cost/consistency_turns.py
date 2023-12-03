@@ -1,4 +1,5 @@
 from brightest_path_lib.cost import Cost
+from typing import List, Tuple
 import numpy as np
 import math
 
@@ -27,6 +28,7 @@ class ConsistencyTurns(Cost):
         is between RECIPROCAL MIN and RECIPROCAL_MAX
 
     """
+    # TODO: make weights for intensity and consistency optional parameters
     def __init__(self, min_intensity: float, max_intensity: float, 
                  target_rgb: np.ndarray) -> None:
         super().__init__()
@@ -44,8 +46,10 @@ class ConsistencyTurns(Cost):
         self.target_rgb = target_rgb
         self.RECIPROCAL_MIN = float(1E-6)
         self.RECIPROCAL_MAX = 255.0
-        self.THRESHOLD = 0.5
-        self.MIN_RGB_DIST = 0.1
+        self.INT_THRESHOLD = 0.5
+        self.RGB_DIST_THRESHOLD = 0.1
+        self.RGB_WEIGHT = 255.0
+        self.DIRECTION_WEIGHT = 255.0
         self._min_step_cost = 1.0 / self.RECIPROCAL_MAX
 
     @staticmethod
@@ -64,9 +68,15 @@ class ConsistencyTurns(Cost):
         pass
 
     # TODO: x, y, intensity, theta(pervious direction moved)
-    def cost_of_moving_to(self, intensity_at_new_point: float, 
-                          rgba_at_new_point: np.ndarray, 
-                          movement_distance: float) -> float:
+    def cost_of_moving_to(self, curr_pt: Tuple,
+                          new_pt: Tuple,
+                          intensity_at_new_point: float,
+                          intensity_at_curr_point: float,
+                          rgba_at_new_point: np.ndarray,
+                          rgba_at_curr_point: np.ndarray,
+                          curr_dir: float,
+                          new_dir: float,
+                          block_distance: float) -> float:
         """calculates the cost of moving to a point
 
         Parameters
@@ -89,20 +99,19 @@ class ConsistencyTurns(Cost):
         if intensity_at_new_point > self.max_intensity:
             raise ValueError
 
-        intensity_at_new_point = self.RECIPROCAL_MAX * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
-
-        if intensity_at_new_point > self.THRESHOLD * self.RECIPROCAL_MAX:
-            rgb_dist = self._rgb_distance(self.target_rgb, rgba_at_new_point)
-            if rgb_dist < self.MIN_RGB_DIST:
-                # TODO: NEED TO WORK ON - probably
-                if movement_distance > 1:
-                    return 255.0 * movement_distance
-                    rgb_dist = 255.0 * self._rgb_distance(self.target_rgb, rgba_at_new_point)
-                    return math.max(rgb_dist, self.RECIPROCAL_MIN)
-                else:
-                    return self.minimum_step_cost()
-            return 255.0 * rgb_dist
+        # if intensity great enough, we should check the consistency of rgb values
+        if intensity_at_new_point > self.INT_THRESHOLD:
+            rgb_dist = self._rgb_distance(rgba_at_curr_point, rgba_at_new_point)
+            # if the rgb values are pretty consistent, then use block distance
+            # to determine the next best pixel to move to
+            if rgb_dist < self.RGB_DIST_THRESHOLD:
+                # TODO: need to update 
+                return max(self.DIRECTION_WEIGHT * block_distance, 
+                              self.minimum_step_cost())
+            rgb_dist = self.RGB_WEIGHT * rgb_dist
+            return max(rgb_dist, self.RECIPROCAL_MIN)
         
+        intensity_at_new_point = self.RECIPROCAL_MAX * (intensity_at_new_point - self.min_intensity) / (self.max_intensity - self.min_intensity)
         if intensity_at_new_point < self.RECIPROCAL_MIN:
             intensity_at_new_point = self.RECIPROCAL_MIN
         return 1.0 / intensity_at_new_point

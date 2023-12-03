@@ -109,6 +109,7 @@ class AStarSearch:
         rgba_image: np.ndarray,
         start_point: np.ndarray,
         goal_point: np.ndarray,
+        start_direction: float = 0.0,
         scale: Tuple = (1.0, 1.0),
         cost_function: CostFunction = CostFunction.RECIPROCAL,
         heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN,
@@ -122,6 +123,7 @@ class AStarSearch:
         self.image_stats = ImageStats(int_image)
         self.start_point = np.round(start_point).astype(int)
         self.goal_point = np.round(goal_point).astype(int)
+        self.start_direction = start_direction
         self.scale = scale
         self.open_nodes = open_nodes
 
@@ -190,6 +192,7 @@ class AStarSearch:
         open_set = PriorityQueue()
         start_node = Node(
             point=self.start_point, 
+            direction=self.start_direction,
             g_score=0, 
             h_score=self._estimate_cost_to_goal(self.start_point), 
             predecessor=None
@@ -269,6 +272,20 @@ class AStarSearch:
         else:
             return self._find_3D_neighbors_of(node)
     
+    def unit_sign(self, n):
+        """
+        Returns:
+            1   - if sign of n is positive
+            -1  - if sign of n is negative
+            0   - if n is zero
+        """
+        if n > 0:
+            return 1
+        elif n < 0:
+            return -1
+        else:
+            return 0
+
     def _find_2D_neighbors_of(self, node: Node) -> List[Node]:
         """Finds the neighbors of a 2D node
 
@@ -292,6 +309,13 @@ class AStarSearch:
         in these directions
         - 2D coordinates are of the type (y, x)
         """
+        curr_x = node.point[1]
+        curr_y = node.point[0]
+        curr_direction = node.direction
+        intensity_at_curr_point = float(self.int_image[curr_y, curr_x])
+        rgba_at_curr_point = self.rgba_image[curr_y, curr_x]
+        curr_xdiff = self.unit_sign(math.sin(math.radians(curr_direction)))
+        curr_ydiff = self.unit_sign(math.cos(math.radians(curr_direction)))
         neighbors = []
         steps = [-1, 0, 1]
         for xdiff in steps:
@@ -306,33 +330,39 @@ class AStarSearch:
                 new_y = node.point[0] + ydiff
                 if new_y < self.image_stats.y_min or new_y > self.image_stats.y_max:
                     continue
-
-                new_point = np.array([new_y, new_x])
-
+                # TODO: change below to tuple in Node, and change to (x, y)?
+                new_point = np.array([new_y, new_x])    
+                # calculates a angle in radians between -pi and pi -> degrees
+                # could implement direction angle calculation with a mapping
+                new_direction = math.degrees(math.atan2(ydiff, xdiff))
                 h_for_new_point = self._estimate_cost_to_goal(new_point)
-
+                # LOOK UP HOW X AND Y ARE HANDLED IN IMAGES 
                 intensity_at_new_point = float(self.int_image[new_y, new_x])
                 rgba_at_new_point = self.rgba_image[new_y, new_x]
-                
+                # distance_to_new_pt = math.sqrt(xdiff*xdiff + ydiff*ydiff)
+                # gives a distance that 
 
-                distance_to_new_pt = math.sqrt(xdiff*xdiff + ydiff*ydiff)
+                block_distance = (math.pow((xdiff - curr_xdiff), 2) 
+                                    + math.pow((ydiff - curr_ydiff), 2)) 
+
                 cost_of_moving_to_new_point = (self.cost_function
                                                .cost_of_moving_to(
-                                                    # curr_x and curr_y
-                                                    # new_x and new_y
+                                                    (curr_y, curr_x),  # (y, x)
+                                                    (new_y, new_x),  # (y, x)
                                                     intensity_at_new_point,
-                                                    # pass in intensity_at_old_point    
+                                                    intensity_at_curr_point,
                                                     rgba_at_new_point,
-                                                    # rgba_at_old_point
-                                                    # curr_theta
-                                                   distance_to_new_pt))
+                                                    rgba_at_curr_point,
+                                                    curr_direction,
+                                                    new_direction,
+                                                    block_distance))
                 if cost_of_moving_to_new_point < self.cost_function.minimum_step_cost():
                     cost_of_moving_to_new_point = self.cost_function.minimum_step_cost()
 
                 g_for_new_point = node.g_score + math.sqrt((xdiff*xdiff) + (ydiff*ydiff)) * cost_of_moving_to_new_point
                 neighbor = Node(
                     point=new_point,
-                    # direction,
+                    direction=new_direction,
                     g_score=g_for_new_point,
                     h_score=h_for_new_point,
                     predecessor=node

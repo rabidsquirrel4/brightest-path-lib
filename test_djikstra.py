@@ -41,15 +41,15 @@ print(f"Image Shape: {img_gray.shape}")
 #                   "src/images/substation3_200.png": [(2220, 4244), (5116, 4601)],
 #                   }
 
-# dictionary of pixels for objects for 200 image
+# dictionary of pixels for objects for 200 image, updated for new 
 start_end_dict = {"pair1": [(2270, 4246), (5117, 4600)],
-                  "pair2": [(328, 1137), (702, 7413)],
-                  "pair3": [(2955, 1571), (5171, 3577)],
-                  "pair4": [(4171, 5742), (5516, 5860)],
-                  "pair5": [(5110, 940), (2991, 1217)],
+                  "pair2": [(397, 1137), (700, 7303)],
+                  "pair3": [(3026, 1571), (5128, 3577)],
+                  "pair4": [(4158, 5742), (5513, 5860)],
+                  "pair5": [(5100, 941), (3021, 1216)],
                   }
 
-pair = "pair1"
+pair = "pair5"
 start_pixel, end_pixel = start_end_dict[pair][0], start_end_dict[pair][1]
 
 cost_func = "ct"
@@ -71,14 +71,14 @@ astar_end_time = time.time()
 print("AStar ended.")
 print(f"Astar Run Time: {astar_end_time - astar_start_time} seconds")
 
-# plt.imshow(img_rgba)
+plt.imshow(img_rgba)
 plt.plot(start_pixel[1], start_pixel[0], 'og')
 plt.plot(end_pixel[1], end_pixel[0], 'or')
 plt.plot([point[1] for point in astar.result], [point[0] for point in path], '-b', linewidth=3)
 plt.plot(start_pixel[1], start_pixel[0], 'og')
 plt.plot(end_pixel[1], end_pixel[0], 'or')
 plt.tight_layout()
-plt.savefig(f"images/substation3_200_{pair}_consist_turns.png")
+plt.savefig(f"images/substation3_200_{pair}_{cost_func}.png")
 # plt.show()
 plt.close()
 
