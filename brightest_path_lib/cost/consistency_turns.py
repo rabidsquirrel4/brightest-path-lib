@@ -108,8 +108,9 @@ class ConsistencyTurns(Cost):
             intensity_at_new_point = self.RECIPROCAL_MIN
         int_cost = 1.0 / intensity_at_new_point
         
-        weighted_sum_cost = (self.RGB_WEIGHT * rgb_cost + 
-                             self.DIRECTION_WEIGHT * dir_cost + int_cost) 
+        weighted_sum_cost = self.RGB_WEIGHT * rgb_cost + int_cost 
+        if rgb_cost < self.RGB_DIST_THRESHOLD:
+            weighted_sum_cost += self.DIRECTION_WEIGHT * dir_cost 
         return max(weighted_sum_cost, self.minimum_step_cost())
 
     def minimum_step_cost(self) -> float:
