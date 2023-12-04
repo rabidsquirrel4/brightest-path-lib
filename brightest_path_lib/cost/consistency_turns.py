@@ -68,7 +68,7 @@ class ConsistencyTurns(Cost):
         pass
 
     # TODO: x, y, intensity, theta(pervious direction moved)
-    def cost_of_moving_to(self, curr_pt: Tuple,
+    def cost_of_moving_to(self, curr_pt: Tuple, # (y, x)
                           new_pt: Tuple,
                           intensity_at_new_point: float,
                           intensity_at_curr_point: float,
@@ -111,6 +111,8 @@ class ConsistencyTurns(Cost):
         weighted_sum_cost = self.RGB_WEIGHT * rgb_cost + int_cost 
         if rgb_cost < self.RGB_DIST_THRESHOLD:
             weighted_sum_cost += self.DIRECTION_WEIGHT * dir_cost 
+        if new_pt[1] == 1569:
+            wght_dir_cost = self.DIRECTION_WEIGHT * dir_cost
         return max(weighted_sum_cost, self.minimum_step_cost())
 
     def minimum_step_cost(self) -> float:
