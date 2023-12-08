@@ -111,6 +111,7 @@ class ConsistencyTurns(Cost):
         weighted_sum_cost = self.RGB_WEIGHT * rgb_cost + int_cost 
         if rgb_cost < self.RGB_DIST_THRESHOLD:
             weighted_sum_cost += self.DIRECTION_WEIGHT * dir_cost 
+        # TODO: remove Testing code below:
         if new_pt[1] == 1569:
             wght_dir_cost = self.DIRECTION_WEIGHT * dir_cost
         return max(weighted_sum_cost, self.minimum_step_cost())

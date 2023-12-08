@@ -49,7 +49,7 @@ start_end_dict = {"pair1": [(2270, 4246), (5117, 4600)],
                   "pair5": [(5100, 941), (3021, 1216)],
                   }
 
-pair = "pair3"
+pair = "pair2"
 start_pixel, end_pixel = start_end_dict[pair][0], start_end_dict[pair][1]
 
 cost_func = "ct-wght-sum_rgb-thresh"

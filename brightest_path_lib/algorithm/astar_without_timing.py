@@ -36,7 +36,7 @@ from brightest_path_lib.heuristic import EuclideanTransonic
 from brightest_path_lib.image import ImageStats
 from brightest_path_lib.input import CostFunction, HeuristicFunction
 from brightest_path_lib.node import Node
-import time
+
 
 class AStarSearch:
     """A* Search Implementation
@@ -115,8 +115,7 @@ class AStarSearch:
         heuristic_function: HeuristicFunction = HeuristicFunction.EUCLIDEAN,
         open_nodes: Queue = None
     ):
-        self.TIMEOUT_TIME = 1 * 60 # 1 minute
-        self.start_time = 0
+
         self._validate_inputs(int_image, start_point, goal_point)
 
         self.int_image = int_image
@@ -189,7 +188,6 @@ class AStarSearch:
             that constitute the brightest path between the
             start_point and the goal_point
         """
-        self.start_time = time.time()
         count = 0
         open_set = PriorityQueue()
         start_node = Node(
@@ -206,12 +204,6 @@ class AStarSearch:
         f_scores[tuple(self.start_point)] = start_node.f_score
         
         while not open_set.empty():
-            # TODO: added timing portion, check
-            time_elapsed = time.time() - self.start_time
-            # print(time_elapsed)
-            if time_elapsed > self.TIMEOUT_TIME:
-                self.is_canceled = True
-            
             if self.is_canceled:
                 break
             current_node = open_set.get()[2]
@@ -248,10 +240,8 @@ class AStarSearch:
                         open_set.put((neighbor.f_score, count, neighbor))
             
             close_set_hash.add(current_coordinates)
-    
+
         self.evaluated_nodes = count
-        if self.is_canceled:
-            return None
         return self.result
     
     def _default_value(self) -> float:
